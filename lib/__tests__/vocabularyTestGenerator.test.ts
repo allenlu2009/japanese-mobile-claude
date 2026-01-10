@@ -143,7 +143,7 @@ describe('Vocabulary Test Generator', () => {
               // Allow 'nn' as it represents ん (n sound)
               const isValidNN = /nn/i.test(romanji);
               if (!isValidNN) {
-                fail(`Word "${q.word}" (${q.kana}) has invalid doubled consonant in romanji: "${romanji}"`);
+                throw new Error(`Word "${q.word}" (${q.kana}) has invalid doubled consonant in romanji: "${romanji}"`);
               }
             }
           });
