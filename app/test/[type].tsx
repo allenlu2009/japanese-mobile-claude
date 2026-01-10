@@ -80,16 +80,6 @@ export default function TestScreen() {
       userAnswer: answer.trim(),
       isCorrect: isAnswerCorrect
     }]);
-
-    // Save character attempt for analytics
-    saveCharacterAttempt({
-      character: currentQuestion.characters,
-      userAnswer: answer.trim(),
-      correctAnswer: currentQuestion.correctAnswers[0],
-      isCorrect: isAnswerCorrect,
-      timestamp: Date.now(),
-      testType: testType.charAt(0).toUpperCase() + testType.slice(1) as 'Hiragana' | 'Katakana' | 'Kanji' | 'Vocabulary'
-    }).catch(err => console.error('Failed to save attempt:', err));
   }
 
   function nextQuestion() {
@@ -105,11 +95,12 @@ export default function TestScreen() {
 
   async function finishTest() {
     const score = Math.round((results.filter(r => r.isCorrect).length / results.length) * 100);
+    const testId = `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
 
     try {
       // Save test
       await saveTest({
-        id: `test_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+        id: testId,
         date: Date.now(),
         score,
         category: 'read',
@@ -121,6 +112,25 @@ export default function TestScreen() {
         createdAt: Date.now(),
         updatedAt: Date.now()
       });
+
+      // Save all character attempts with test ID
+      const scriptType = testType.charAt(0).toUpperCase() + testType.slice(1);
+      for (const result of results) {
+        await saveCharacterAttempt({
+          id: `attempt_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+          testId: testId,
+          timestamp: Date.now(),
+          character: result.question.characters,
+          scriptType: scriptType,
+          characterType: null,
+          userAnswer: result.userAnswer,
+          correctAnswers: result.question.correctAnswers,
+          isCorrect: result.isCorrect,
+          questionType: '1-char',
+          jlptLevel: null,
+          readingType: null
+        });
+      }
 
       // Update streak
       await updateStreak();
