@@ -6,6 +6,12 @@ import * as Haptics from 'expo-haptics';
  */
 export async function speakJapanese(text: string, language: 'ja-JP' = 'ja-JP'): Promise<void> {
   try {
+    // Validate text is provided
+    if (!text || typeof text !== 'string') {
+      console.warn('speakJapanese called with invalid text:', text);
+      return;
+    }
+
     // Stop any ongoing speech
     await Speech.stop();
 

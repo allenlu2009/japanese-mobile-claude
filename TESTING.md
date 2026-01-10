@@ -93,6 +93,24 @@
 5. [ ] Verify: Correct answer displayed for wrong answers
 6. [ ] Verify: Score reflects actual performance
 
+### Test Flow 3b: Take Kanji Test
+1. [ ] Select "Kanji" test type (should highlight green)
+2. [ ] Select "5" questions
+3. [ ] Verify: Test loads successfully (not stuck)
+4. [ ] Verify: Kanji characters display correctly
+5. [ ] Verify: Audio speaks kanji character
+6. [ ] Complete test
+7. [ ] Verify: Results show correctly
+
+### Test Flow 3c: Take Vocabulary Test
+1. [ ] Select "Vocabulary" test type (should highlight orange)
+2. [ ] Select "5" questions
+3. [ ] Verify: Test loads successfully
+4. [ ] Verify: Japanese words display correctly
+5. [ ] Verify: Audio speaks vocabulary words
+6. [ ] Complete test
+7. [ ] Verify: Results show correctly
+
 ### Test Flow 4: Analytics Update
 1. [ ] Navigate to Analytics tab
 2. [ ] Verify: "Total Tests" shows 2
@@ -121,7 +139,19 @@
 3. [ ] Verify: Share dialog appears
 4. [ ] Verify: Can save/share file
 
-### Test Flow 8: Audio & Haptics
+### Test Flow 8: UI Layout with Keyboard
+1. [ ] Start a new Hiragana test
+2. [ ] Verify: "WHAT IS THE ROMANJI?" text is at top
+3. [ ] Verify: Character and 🔊 button are side-by-side
+4. [ ] Tap the input field
+5. [ ] Verify: Keyboard appears
+6. [ ] Verify: Character and speaker icon still visible above keyboard
+7. [ ] Verify: Input field visible above keyboard
+8. [ ] Type answer and submit
+9. [ ] Verify: Feedback message visible above keyboard
+10. [ ] Verify: "Next Question" button visible and tappable
+
+### Test Flow 9: Audio & Haptics
 1. [ ] Start a new Hiragana test
 2. [ ] Verify: Character is spoken automatically on load
 3. [ ] Verify: Tap 🔊 button to hear character again
@@ -166,6 +196,10 @@
 5. ✅ react-native-reanimated missing - Added as NativeWind dependency
 6. ✅ saveSettings not a function - Added missing function to settingsStorage
 7. ✅ Audio muting after first character - Fixed settings loading order
+8. ✅ Input/output blocked by keyboard - Moved layout to top with speaker icon beside character
+9. ✅ Kanji test stuck at loading - Fixed parameter order in generateKanjiQuestions()
+10. ✅ Vocabulary test stuck at loading - Fixed parameter order in generateVocabularyQuestions()
+11. ✅ TTS crash on undefined text - Added validation in speakJapanese()
 
 ## 🔍 Error Scenarios to Test
 
