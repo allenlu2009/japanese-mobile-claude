@@ -244,7 +244,7 @@ export default function TestScreen() {
         <View className="flex-1 justify-start pt-8 gap-8">
           <View className="items-center gap-3">
             <Text className="text-xs uppercase tracking-[0.3em] text-slate-400">
-              What is the romanji?
+              What is the romaji?
             </Text>
             <View className="flex-row items-center gap-4">
               <Text className="text-6xl font-bold text-slate-900">
