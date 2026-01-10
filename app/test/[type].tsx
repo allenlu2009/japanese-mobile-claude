@@ -7,7 +7,9 @@ import { generateKanjiQuestions } from '../../lib/kanjiTestGenerator';
 import { generateVocabularyQuestions } from '../../lib/vocabularyTestGenerator';
 import { saveTest, saveCharacterAttempt } from '../../lib/storage/testStorage';
 import { updateStreak } from '../../lib/storage/streakStorage';
+import { getSettings } from '../../lib/storage/settingsStorage';
 import { analyzeAnswer } from '../../lib/answerAnalysis';
+import { speakJapanese, playSuccessSound, playErrorSound, playButtonPress, stopSpeech } from '../../lib/audio';
 import type { TestType } from '../../lib/types';
 
 interface Question {
@@ -30,12 +32,30 @@ export default function TestScreen() {
   const [showResult, setShowResult] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [testStartTime] = useState(Date.now());
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [hapticsEnabled, setHapticsEnabled] = useState(true);
 
   const inputRef = useRef<TextInput>(null);
 
   useEffect(() => {
     loadTest();
+    loadSettings();
+
+    // Cleanup: stop speech when component unmounts
+    return () => {
+      stopSpeech();
+    };
   }, []);
+
+  async function loadSettings() {
+    try {
+      const settings = await getSettings();
+      setSoundEnabled(settings.soundEnabled);
+      setHapticsEnabled(settings.hapticsEnabled);
+    } catch (error) {
+      console.error('Failed to load settings:', error);
+    }
+  }
 
   async function loadTest() {
     try {
@@ -59,6 +79,13 @@ export default function TestScreen() {
       }
 
       setQuestions(generatedQuestions);
+
+      // Speak the first question if sound is enabled
+      if (generatedQuestions.length > 0 && soundEnabled) {
+        setTimeout(() => {
+          speakJapanese(generatedQuestions[0].characters);
+        }, 500);
+      }
     } catch (error) {
       console.error('Failed to generate test:', error);
       Alert.alert('Error', 'Failed to generate test questions');
@@ -80,17 +107,37 @@ export default function TestScreen() {
       userAnswer: answer.trim(),
       isCorrect: isAnswerCorrect
     }]);
+
+    // Play sound/haptic feedback
+    if (isAnswerCorrect) {
+      playSuccessSound(hapticsEnabled);
+    } else {
+      playErrorSound(hapticsEnabled);
+    }
   }
 
   function nextQuestion() {
     if (currentIndex < questions.length - 1) {
-      setCurrentIndex(currentIndex + 1);
+      const nextIndex = currentIndex + 1;
+      setCurrentIndex(nextIndex);
       setAnswer('');
       setShowResult(false);
       setTimeout(() => inputRef.current?.focus(), 100);
+
+      // Speak the next question
+      if (soundEnabled) {
+        setTimeout(() => {
+          speakJapanese(questions[nextIndex].characters);
+        }, 300);
+      }
     } else {
       finishTest();
     }
+  }
+
+  function handlePlayAudio() {
+    playButtonPress(hapticsEnabled);
+    speakJapanese(questions[currentIndex].characters);
   }
 
   async function finishTest() {
@@ -189,9 +236,19 @@ export default function TestScreen() {
             <Text className="text-sm uppercase tracking-[0.3em] text-slate-400">
               What is the romanji?
             </Text>
-            <Text className="text-7xl font-bold text-slate-900">
-              {currentQuestion.characters}
-            </Text>
+            <View className="items-center gap-3">
+              <Text className="text-7xl font-bold text-slate-900">
+                {currentQuestion.characters}
+              </Text>
+              {soundEnabled && (
+                <TouchableOpacity
+                  onPress={handlePlayAudio}
+                  className="rounded-full bg-blue-100 px-6 py-3 active:bg-blue-200"
+                >
+                  <Text className="text-2xl">🔊</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
 
           {/* Answer Input */}
