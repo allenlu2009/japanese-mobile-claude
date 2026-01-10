@@ -39,7 +39,6 @@ export default function TestScreen() {
 
   useEffect(() => {
     loadTest();
-    loadSettings();
 
     // Cleanup: stop speech when component unmounts
     return () => {
@@ -47,18 +46,13 @@ export default function TestScreen() {
     };
   }, []);
 
-  async function loadSettings() {
+  async function loadTest() {
     try {
+      // Load settings first
       const settings = await getSettings();
       setSoundEnabled(settings.soundEnabled);
       setHapticsEnabled(settings.hapticsEnabled);
-    } catch (error) {
-      console.error('Failed to load settings:', error);
-    }
-  }
 
-  async function loadTest() {
-    try {
       let generatedQuestions: Question[];
 
       switch (testType) {
@@ -81,7 +75,7 @@ export default function TestScreen() {
       setQuestions(generatedQuestions);
 
       // Speak the first question if sound is enabled
-      if (generatedQuestions.length > 0 && soundEnabled) {
+      if (generatedQuestions.length > 0 && settings.soundEnabled) {
         setTimeout(() => {
           speakJapanese(generatedQuestions[0].characters);
         }, 500);
