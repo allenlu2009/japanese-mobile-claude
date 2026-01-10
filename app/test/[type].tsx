@@ -63,10 +63,26 @@ export default function TestScreen() {
           generatedQuestions = generateKatakanaQuestions('1-char', numQuestions, 'all');
           break;
         case 'kanji':
-          generatedQuestions = await generateKanjiQuestions('n5', numQuestions);
+          const kanjiQuestions = generateKanjiQuestions(numQuestions, 'N5', 'mixed', true);
+          // Map KanjiQuestion to Question interface
+          generatedQuestions = kanjiQuestions.map(q => ({
+            id: q.id,
+            characters: q.kanji,
+            correctAnswers: q.correctAnswers,
+            userAnswer: q.userAnswer,
+            isCorrect: q.isCorrect
+          }));
           break;
         case 'vocabulary':
-          generatedQuestions = await generateVocabularyQuestions('n5', numQuestions);
+          const vocabQuestions = generateVocabularyQuestions(numQuestions, 'N5', true);
+          // Map VocabularyQuestion to Question interface
+          generatedQuestions = vocabQuestions.map(q => ({
+            id: q.id,
+            characters: q.word,
+            correctAnswers: q.correctAnswers,
+            userAnswer: q.userAnswer,
+            isCorrect: q.isCorrect
+          }));
           break;
         default:
           generatedQuestions = generateQuestions('1-char', numQuestions, 'all');
@@ -225,21 +241,21 @@ export default function TestScreen() {
         </View>
 
         {/* Question */}
-        <View className="flex-1 items-center justify-center gap-8">
-          <View className="items-center gap-4">
-            <Text className="text-sm uppercase tracking-[0.3em] text-slate-400">
+        <View className="flex-1 justify-start pt-8 gap-8">
+          <View className="items-center gap-3">
+            <Text className="text-xs uppercase tracking-[0.3em] text-slate-400">
               What is the romanji?
             </Text>
-            <View className="items-center gap-3">
-              <Text className="text-7xl font-bold text-slate-900">
+            <View className="flex-row items-center gap-4">
+              <Text className="text-6xl font-bold text-slate-900">
                 {currentQuestion.characters}
               </Text>
               {soundEnabled && (
                 <TouchableOpacity
                   onPress={handlePlayAudio}
-                  className="rounded-full bg-blue-100 px-6 py-3 active:bg-blue-200"
+                  className="rounded-full bg-blue-100 p-3 active:bg-blue-200"
                 >
-                  <Text className="text-2xl">🔊</Text>
+                  <Text className="text-xl">🔊</Text>
                 </TouchableOpacity>
               )}
             </View>
