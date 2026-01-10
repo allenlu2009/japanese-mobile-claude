@@ -1,11 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { View, Text, SafeAreaView, TextInput, TouchableOpacity, Alert, Keyboard } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
-import { generateTest } from '../../lib/testGenerator';
+import { generateQuestions } from '../../lib/testGenerator';
+import { generateKatakanaQuestions } from '../../lib/katakanaTestGenerator';
+import { generateKanjiQuestions } from '../../lib/kanjiTestGenerator';
+import { generateVocabularyQuestions } from '../../lib/vocabularyTestGenerator';
 import { saveTest, saveCharacterAttempt } from '../../lib/storage/testStorage';
 import { updateStreak } from '../../lib/storage/streakStorage';
 import { analyzeAnswer } from '../../lib/answerAnalysis';
-import type { Question, TestType } from '../../lib/types';
+import type { TestType } from '../../lib/types';
+
+interface Question {
+  id: string;
+  characters: string;
+  correctAnswers: string[];
+  userAnswer?: string;
+  isCorrect?: boolean;
+}
 
 export default function TestScreen() {
   const params = useLocalSearchParams();
@@ -28,10 +39,25 @@ export default function TestScreen() {
 
   async function loadTest() {
     try {
-      const generatedQuestions = await generateTest(
-        testType.charAt(0).toUpperCase() + testType.slice(1) as 'Hiragana' | 'Katakana' | 'Kanji' | 'Vocabulary',
-        numQuestions
-      );
+      let generatedQuestions: Question[];
+
+      switch (testType) {
+        case 'hiragana':
+          generatedQuestions = generateQuestions('1-char', numQuestions, 'all');
+          break;
+        case 'katakana':
+          generatedQuestions = generateKatakanaQuestions('1-char', numQuestions, 'all');
+          break;
+        case 'kanji':
+          generatedQuestions = await generateKanjiQuestions('n5', numQuestions);
+          break;
+        case 'vocabulary':
+          generatedQuestions = await generateVocabularyQuestions('n5', numQuestions);
+          break;
+        default:
+          generatedQuestions = generateQuestions('1-char', numQuestions, 'all');
+      }
+
       setQuestions(generatedQuestions);
     } catch (error) {
       console.error('Failed to generate test:', error);
@@ -44,22 +70,23 @@ export default function TestScreen() {
     if (!answer.trim()) return;
 
     const currentQuestion = questions[currentIndex];
-    const result = analyzeAnswer(answer.trim(), currentQuestion.answer, currentQuestion.acceptableAnswers || []);
+    const normalized = answer.trim().toLowerCase();
+    const isAnswerCorrect = currentQuestion.correctAnswers.some(ans => ans.toLowerCase() === normalized);
 
-    setIsCorrect(result.isCorrect);
+    setIsCorrect(isAnswerCorrect);
     setShowResult(true);
     setResults([...results, {
       question: currentQuestion,
       userAnswer: answer.trim(),
-      isCorrect: result.isCorrect
+      isCorrect: isAnswerCorrect
     }]);
 
     // Save character attempt for analytics
     saveCharacterAttempt({
-      character: currentQuestion.question,
+      character: currentQuestion.characters,
       userAnswer: answer.trim(),
-      correctAnswer: currentQuestion.answer,
-      isCorrect: result.isCorrect,
+      correctAnswer: currentQuestion.correctAnswers[0],
+      isCorrect: isAnswerCorrect,
       timestamp: Date.now(),
       testType: testType.charAt(0).toUpperCase() + testType.slice(1) as 'Hiragana' | 'Katakana' | 'Kanji' | 'Vocabulary'
     }).catch(err => console.error('Failed to save attempt:', err));
@@ -150,16 +177,11 @@ export default function TestScreen() {
         <View className="flex-1 items-center justify-center gap-8">
           <View className="items-center gap-4">
             <Text className="text-sm uppercase tracking-[0.3em] text-slate-400">
-              {currentQuestion.prompt}
+              What is the romanji?
             </Text>
             <Text className="text-7xl font-bold text-slate-900">
-              {currentQuestion.question}
+              {currentQuestion.characters}
             </Text>
-            {currentQuestion.hint && (
-              <Text className="text-base text-slate-500">
-                {currentQuestion.hint}
-              </Text>
-            )}
           </View>
 
           {/* Answer Input */}
@@ -197,7 +219,7 @@ export default function TestScreen() {
                 </Text>
                 {!isCorrect && (
                   <Text className="text-center text-slate-600 mt-1">
-                    Correct answer: {currentQuestion.answer}
+                    Correct answer: {currentQuestion.correctAnswers.join(' / ')}
                   </Text>
                 )}
               </View>
