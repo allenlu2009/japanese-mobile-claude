@@ -46,6 +46,13 @@
 - [x] Storage statistics
 - [x] About section
 
+### 7. Audio Features
+- [x] Text-to-Speech for Japanese characters
+- [x] Auto-play on question load
+- [x] Manual replay with 🔊 button
+- [x] Success/error haptic feedback
+- [x] Sound/haptics respect settings toggles
+
 ## 🧪 Manual Testing Checklist
 
 ### Before Testing
@@ -114,14 +121,35 @@
 3. [ ] Verify: Share dialog appears
 4. [ ] Verify: Can save/share file
 
-### Test Flow 8: Settings
+### Test Flow 8: Audio & Haptics
+1. [ ] Start a new Hiragana test
+2. [ ] Verify: Character is spoken automatically on load
+3. [ ] Verify: Tap 🔊 button to hear character again
+4. [ ] Answer correctly
+5. [ ] Verify: Success haptic vibration
+6. [ ] Answer incorrectly on next question
+7. [ ] Verify: Error haptic vibration (different pattern)
+8. [ ] Go to Settings
+9. [ ] Toggle "Sound Effects" off
+10. [ ] Start new test
+11. [ ] Verify: No audio plays
+12. [ ] Verify: 🔊 button is hidden
+13. [ ] Toggle "Haptic Feedback" off
+14. [ ] Verify: No vibrations on correct/incorrect
+
+### Test Flow 9: Settings Persistence
 1. [ ] Navigate to Settings tab
 2. [ ] Toggle "Show Hints" off
 3. [ ] Toggle "Auto Advance" on
-4. [ ] Verify: Settings persist after app reload
-5. [ ] Verify: Storage stats show correct counts
+4. [ ] Toggle "Sound Effects" off
+5. [ ] Close app completely
+6. [ ] Reopen app
+7. [ ] Navigate to Settings
+8. [ ] Verify: All toggles remain as set
+9. [ ] Verify: Sound still disabled in new test
+10. [ ] Verify: Storage stats show correct counts
 
-### Test Flow 9: Clear Data
+### Test Flow 10: Clear Data
 1. [ ] In Settings, click "Clear All Data"
 2. [ ] Verify: Confirmation dialog appears
 3. [ ] Click "Clear Data"
@@ -136,6 +164,8 @@
 3. ✅ Test generator import errors - Fixed to use correct generator functions
 4. ✅ Character attempts NOT NULL error - Fixed to save with test_id at completion
 5. ✅ react-native-reanimated missing - Added as NativeWind dependency
+6. ✅ saveSettings not a function - Added missing function to settingsStorage
+7. ✅ Audio muting after first character - Fixed settings loading order
 
 ## 🔍 Error Scenarios to Test
 
@@ -160,5 +190,8 @@
 - ✅ Data persists between app sessions
 - ✅ Import/export compatible with web version
 - ✅ Analytics accurately reflect test history
+- ✅ Audio plays for all characters throughout test
+- ✅ Haptic feedback works on correct/incorrect answers
+- ✅ Settings persist and affect behavior correctly
 - ✅ No crashes during normal usage
 - ✅ UI is polished and responsive
