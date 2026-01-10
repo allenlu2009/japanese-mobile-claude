@@ -1,11 +1,12 @@
 {
   "expo": {
-    "name": "japanese-mobile-claude",
+    "name": "Japanese Learning Lab",
     "slug": "japanese-mobile-claude",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
+    "scheme": "japanese-learning",
+    "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash-icon.png",
@@ -13,18 +14,32 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.claude.japaneselearning"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "minSdkVersion": 23,
+      "targetSdkVersion": 34,
+      "compileSdkVersion": 34,
+      "package": "com.claude.japaneselearning",
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
     "web": {
+      "bundler": "metro",
+      "output": "static",
       "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      "expo-sqlite"
+    ],
+    "experiments": {
+      "typedRoutes": true
     }
   }
 }
