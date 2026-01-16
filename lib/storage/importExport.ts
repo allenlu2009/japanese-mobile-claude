@@ -104,17 +104,25 @@ export async function parseAndImport(jsonString: string, fileName: string): Prom
           );
 
           if (!existing) {
-            // Normalize field names (handle both web format and variations)
+            // Normalize field names (handle v1.0 schema and old format)
+            // v1.0 schema: {id, timestamp, testType, score, totalQuestions, correctAnswers, difficulty}
+            // Old format: {id, date, score, category, description, testType, numQuestions}
+
             const normalizedTest: Test = {
               id: test.id,
-              date: test.date ? (typeof test.date === 'string' ? new Date(test.date).getTime() : test.date) : Date.now(),
+              // v1.0 uses 'timestamp', old uses 'date'
+              date: test.timestamp ? new Date(test.timestamp).getTime() :
+                    (test.date ? (typeof test.date === 'string' ? new Date(test.date).getTime() : test.date) : Date.now()),
               score: test.score,
+              // v1.0 doesn't have category, use 'read' as default
               category: test.category || 'read',
-              description: test.description || '',
+              // v1.0 doesn't have description, generate from testType
+              description: test.description || `${test.testType || test.test_type || 'Test'} - ${test.score}%`,
               testType: test.testType || test.test_type || 'Kana',
               jlptLevel: test.jlptLevel || test.jlpt_level || null,
-              numQuestions: test.numQuestions || test.num_questions || 0,
-              createdAt: test.createdAt || test.created_at || Date.now(),
+              // v1.0 uses 'totalQuestions', old uses 'numQuestions'
+              numQuestions: test.totalQuestions || test.numQuestions || test.num_questions || 0,
+              createdAt: test.createdAt || test.created_at || (test.timestamp ? new Date(test.timestamp).getTime() : Date.now()),
               updatedAt: test.updatedAt || test.updated_at || Date.now()
             };
 
