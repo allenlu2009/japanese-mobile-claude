@@ -124,7 +124,86 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
     `);
 
     console.log('✅ Migration complete: tests table rebuilt with correct schema');
-    return;
+  }
+
+  // Migrate character_attempts table if needed
+  const attemptsTableInfo = await database.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(character_attempts)`
+  );
+  const attemptsColumnNames = attemptsTableInfo.map(col => col.name);
+  console.log('📋 Current character_attempts table columns:', attemptsColumnNames.join(', '));
+
+  const expectedAttemptsColumns = ['id', 'test_id', 'timestamp', 'character', 'script_type', 'character_type', 'user_answer', 'correct_answers', 'is_correct', 'question_type', 'jlpt_level', 'reading_type', 'source'];
+  const hasAllAttemptsColumns = expectedAttemptsColumns.every(col => attemptsColumnNames.includes(col));
+  const hasOldV1Columns = attemptsColumnNames.includes('prompt') || attemptsColumnNames.includes('expected') || attemptsColumnNames.includes('response') || attemptsColumnNames.includes('correct');
+
+  if (!hasAllAttemptsColumns || hasOldV1Columns) {
+    console.log('🔄 Running migration: Rebuilding character_attempts table with correct schema');
+
+    await database.execAsync(`
+      -- Create new table with correct schema
+      CREATE TABLE IF NOT EXISTS character_attempts_new (
+        id TEXT PRIMARY KEY,
+        test_id TEXT NOT NULL,
+        timestamp INTEGER NOT NULL,
+        character TEXT NOT NULL,
+        script_type TEXT NOT NULL,
+        character_type TEXT,
+        user_answer TEXT NOT NULL,
+        correct_answers TEXT NOT NULL,
+        is_correct INTEGER NOT NULL,
+        question_type TEXT NOT NULL,
+        jlpt_level TEXT,
+        reading_type TEXT,
+        source TEXT DEFAULT 'mobile',
+        FOREIGN KEY (test_id) REFERENCES tests(id) ON DELETE CASCADE
+      );
+    `);
+
+    // Map old column names to new
+    const characterCol = attemptsColumnNames.includes('character') ? 'character' :
+                         attemptsColumnNames.includes('prompt') ? 'prompt' : 'character';
+    const userAnswerCol = attemptsColumnNames.includes('user_answer') ? 'user_answer' :
+                          attemptsColumnNames.includes('response') ? 'response' : 'user_answer';
+    const correctAnswersCol = attemptsColumnNames.includes('correct_answers') ? 'correct_answers' :
+                              attemptsColumnNames.includes('expected') ? 'expected' : 'correct_answers';
+    const isCorrectCol = attemptsColumnNames.includes('is_correct') ? 'is_correct' :
+                         attemptsColumnNames.includes('correct') ? 'correct' : 'is_correct';
+
+    const attemptsSelectColumns = [
+      'id',
+      'test_id',
+      'timestamp',
+      `${characterCol} as character`,
+      'script_type',
+      attemptsColumnNames.includes('character_type') ? 'character_type' : 'NULL as character_type',
+      `${userAnswerCol} as user_answer`,
+      `${correctAnswersCol} as correct_answers`,
+      `${isCorrectCol} as is_correct`,
+      attemptsColumnNames.includes('question_type') ? 'question_type' : `'1-char' as question_type`,
+      'jlpt_level',
+      attemptsColumnNames.includes('reading_type') ? 'reading_type' : 'NULL as reading_type',
+      attemptsColumnNames.includes('source') ? 'source' : `'mobile' as source`
+    ].join(', ');
+
+    await database.execAsync(`
+      -- Copy data
+      INSERT INTO character_attempts_new SELECT ${attemptsSelectColumns} FROM character_attempts;
+
+      -- Drop old table
+      DROP TABLE character_attempts;
+
+      -- Rename new table
+      ALTER TABLE character_attempts_new RENAME TO character_attempts;
+
+      -- Recreate indexes
+      CREATE INDEX IF NOT EXISTS idx_attempts_test_id ON character_attempts(test_id);
+      CREATE INDEX IF NOT EXISTS idx_attempts_character ON character_attempts(character);
+      CREATE INDEX IF NOT EXISTS idx_attempts_script_type ON character_attempts(script_type);
+      CREATE INDEX IF NOT EXISTS idx_attempts_timestamp ON character_attempts(timestamp);
+    `);
+
+    console.log('✅ Migration complete: character_attempts table rebuilt with correct schema');
   }
 
   console.log('✅ Schema is up to date, no migrations needed');
