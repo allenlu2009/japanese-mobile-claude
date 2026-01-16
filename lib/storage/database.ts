@@ -5,6 +5,40 @@ const DB_NAME = 'japanese-learning.db';
 let db: SQLite.SQLiteDatabase | null = null;
 
 /**
+ * Run database migrations
+ */
+async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
+  // Check if category column exists
+  const tableInfo = await database.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(tests)`
+  );
+
+  const hasCategoryColumn = tableInfo.some(col => col.name === 'category');
+
+  if (!hasCategoryColumn) {
+    console.log('🔄 Running migration: Adding category column to tests table');
+    await database.execAsync(`
+      ALTER TABLE tests ADD COLUMN category TEXT NOT NULL DEFAULT 'read';
+    `);
+    console.log('✅ Migration complete: category column added');
+  }
+
+  const hasDescriptionColumn = tableInfo.some(col => col.name === 'description');
+
+  if (!hasDescriptionColumn) {
+    console.log('🔄 Running migration: Adding description column to tests table');
+    await database.execAsync(`
+      ALTER TABLE tests ADD COLUMN description TEXT NOT NULL DEFAULT '';
+    `);
+    // Update empty descriptions with generated values
+    await database.execAsync(`
+      UPDATE tests SET description = test_type || ' - ' || score || '%' WHERE description = '';
+    `);
+    console.log('✅ Migration complete: description column added');
+  }
+}
+
+/**
  * Initialize the SQLite database and create tables
  */
 export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -102,6 +136,9 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
     INSERT OR IGNORE INTO app_settings (key, value) VALUES ('notifications_enabled', 'true');
     INSERT OR IGNORE INTO app_settings (key, value) VALUES ('reminder_time', '20:00');
   `);
+
+  // Run migrations to update existing databases
+  await runMigrations(db);
 
   console.log('✅ Database initialized successfully');
   return db;
