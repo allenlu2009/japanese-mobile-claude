@@ -8,34 +8,120 @@ let db: SQLite.SQLiteDatabase | null = null;
  * Run database migrations
  */
 async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
-  // Check if category column exists
-  const tableInfo = await database.getAllAsync<{ name: string }>(
+  // Check if tests table exists first
+  const tables = await database.getAllAsync<{ name: string }>(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='tests'`
+  );
+
+  if (tables.length === 0) {
+    // Table doesn't exist yet, skip migrations
+    return;
+  }
+
+  // Get current table schema
+  const tableInfo = await database.getAllAsync<{ name: string; type: string }>(
     `PRAGMA table_info(tests)`
   );
 
-  const hasCategoryColumn = tableInfo.some(col => col.name === 'category');
+  const columnNames = tableInfo.map(col => col.name);
+  console.log('📋 Current tests table columns:', columnNames.join(', '));
 
-  if (!hasCategoryColumn) {
-    console.log('🔄 Running migration: Adding category column to tests table');
-    await database.execAsync(`
-      ALTER TABLE tests ADD COLUMN category TEXT NOT NULL DEFAULT 'read';
-    `);
-    console.log('✅ Migration complete: category column added');
+  // Check each required column and add if missing
+  const requiredColumns = [
+    { name: 'category', type: 'TEXT', notNull: true, defaultValue: "'read'" },
+    { name: 'description', type: 'TEXT', notNull: true, defaultValue: "''" },
+    { name: 'num_questions', type: 'INTEGER', notNull: true, defaultValue: '0' }
+  ];
+
+  for (const col of requiredColumns) {
+    if (!columnNames.includes(col.name)) {
+      console.log(`🔄 Running migration: Adding ${col.name} column to tests table`);
+      await database.execAsync(`
+        ALTER TABLE tests ADD COLUMN ${col.name} ${col.type} ${col.notNull ? 'NOT NULL' : ''} DEFAULT ${col.defaultValue};
+      `);
+
+      // Special handling for description - generate from test_type and score
+      if (col.name === 'description') {
+        await database.execAsync(`
+          UPDATE tests SET description = test_type || ' - ' || score || '%' WHERE description = '';
+        `);
+      }
+
+      console.log(`✅ Migration complete: ${col.name} column added`);
+    }
   }
 
-  const hasDescriptionColumn = tableInfo.some(col => col.name === 'description');
+  // After adding columns, verify all expected columns exist
+  const updatedTableInfo = await database.getAllAsync<{ name: string }>(
+    `PRAGMA table_info(tests)`
+  );
+  const updatedColumnNames = updatedTableInfo.map(col => col.name);
+  const expectedColumns = ['id', 'date', 'score', 'category', 'description', 'test_type', 'jlpt_level', 'num_questions', 'source', 'created_at', 'updated_at'];
+  const hasAllExpectedColumns = expectedColumns.every(col => updatedColumnNames.includes(col));
 
-  if (!hasDescriptionColumn) {
-    console.log('🔄 Running migration: Adding description column to tests table');
+  if (!hasAllExpectedColumns) {
+    const missingColumns = expectedColumns.filter(col => !updatedColumnNames.includes(col));
+    console.log('❌ Migration failed: Still missing columns:', missingColumns.join(', '));
+    console.log('🔄 Running migration: Rebuilding tests table with correct schema');
+
+    // Create new table with correct schema
     await database.execAsync(`
-      ALTER TABLE tests ADD COLUMN description TEXT NOT NULL DEFAULT '';
+      -- Create new table with correct schema
+      CREATE TABLE IF NOT EXISTS tests_new (
+        id TEXT PRIMARY KEY,
+        date INTEGER NOT NULL,
+        score INTEGER NOT NULL,
+        category TEXT NOT NULL DEFAULT 'read',
+        description TEXT NOT NULL DEFAULT '',
+        test_type TEXT NOT NULL,
+        jlpt_level TEXT,
+        num_questions INTEGER NOT NULL,
+        source TEXT DEFAULT 'mobile',
+        created_at INTEGER NOT NULL,
+        updated_at INTEGER NOT NULL
+      );
     `);
-    // Update empty descriptions with generated values
+
+    // Copy data from old table, handling column name variations
+    const oldNumQuestionsCol = columnNames.includes('num_questions') ? 'num_questions' :
+                                columnNames.includes('num_quiestions') ? 'num_quiestions' :
+                                'num_questions';
+
+    const selectColumns = [
+      'id',
+      'date',
+      'score',
+      columnNames.includes('category') ? 'category' : `'read' as category`,
+      columnNames.includes('description') ? 'description' : `test_type || ' - ' || score || '%' as description`,
+      'test_type',
+      'jlpt_level',
+      `${oldNumQuestionsCol} as num_questions`,
+      columnNames.includes('source') ? 'source' : `'mobile' as source`,
+      columnNames.includes('created_at') ? 'created_at' : 'date as created_at',
+      columnNames.includes('updated_at') ? 'updated_at' : 'date as updated_at'
+    ].join(', ');
+
     await database.execAsync(`
-      UPDATE tests SET description = test_type || ' - ' || score || '%' WHERE description = '';
+      -- Copy data
+      INSERT INTO tests_new SELECT ${selectColumns} FROM tests;
+
+      -- Drop old table
+      DROP TABLE tests;
+
+      -- Rename new table
+      ALTER TABLE tests_new RENAME TO tests;
+
+      -- Recreate indexes
+      CREATE INDEX IF NOT EXISTS idx_tests_date ON tests(date);
+      CREATE INDEX IF NOT EXISTS idx_tests_type ON tests(test_type);
+      CREATE INDEX IF NOT EXISTS idx_tests_source ON tests(source);
     `);
-    console.log('✅ Migration complete: description column added');
+
+    console.log('✅ Migration complete: tests table rebuilt with correct schema');
+    return;
   }
+
+  console.log('✅ Schema is up to date, no migrations needed');
 }
 
 /**
