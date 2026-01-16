@@ -83,13 +83,18 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
     `);
 
     // Copy data from old table, handling column name variations
+    const oldDateCol = columnNames.includes('date') ? 'date' :
+                       columnNames.includes('timestamp') ? 'timestamp' :
+                       'date';
+
     const oldNumQuestionsCol = columnNames.includes('num_questions') ? 'num_questions' :
+                                columnNames.includes('total_questions') ? 'total_questions' :
                                 columnNames.includes('num_quiestions') ? 'num_quiestions' :
                                 'num_questions';
 
     const selectColumns = [
       'id',
-      'date',
+      `${oldDateCol} as date`,
       'score',
       columnNames.includes('category') ? 'category' : `'read' as category`,
       columnNames.includes('description') ? 'description' : `test_type || ' - ' || score || '%' as description`,
@@ -97,8 +102,8 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
       'jlpt_level',
       `${oldNumQuestionsCol} as num_questions`,
       columnNames.includes('source') ? 'source' : `'mobile' as source`,
-      columnNames.includes('created_at') ? 'created_at' : 'date as created_at',
-      columnNames.includes('updated_at') ? 'updated_at' : 'date as updated_at'
+      columnNames.includes('created_at') ? 'created_at' : `${oldDateCol} as created_at`,
+      columnNames.includes('updated_at') ? 'updated_at' : `${oldDateCol} as updated_at`
     ].join(', ');
 
     await database.execAsync(`
