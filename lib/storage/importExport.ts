@@ -1,6 +1,6 @@
-import * as FileSystem from 'expo-file-system';
 import * as DocumentPicker from 'expo-document-picker';
 import * as Sharing from 'expo-sharing';
+import { readAsStringAsync, writeAsStringAsync, documentDirectory } from 'expo-file-system/legacy';
 import { getDatabase } from './database';
 import { saveTest, saveCharacterAttempt, getTests, getCharacterAttempts } from './testStorage';
 import type { Test, CharacterAttempt } from '../types';
@@ -48,14 +48,17 @@ export async function parseAndImport(jsonString: string, fileName: string): Prom
       warnings.push(`Different version: ${data.version} (current: 1.0)`);
     }
 
+    // Check for v1.0 schema (flat structure)
+    const hasV1Schema = data.tests && data.attempts && data.meta;
+
     // Validate tests
     const tests = data.tests || [];
     if (tests.length === 0) {
       warnings.push('No tests found in import file');
     }
 
-    // Validate character attempts
-    const attempts = data.characterAttempts || [];
+    // Validate character attempts (v1.0 uses 'attempts', old format uses 'characterAttempts')
+    const attempts = data.attempts || data.characterAttempts || [];
     if (attempts.length === 0) {
       warnings.push('No character attempts - analytics will be limited');
     }
@@ -75,7 +78,8 @@ export async function parseAndImport(jsonString: string, fileName: string): Prom
     // Filter invalid attempt entries
     const validAttempts = attempts.filter((a: any) => {
       if (!a.id || typeof a.id !== 'string') return false;
-      if (!a.character || typeof a.character !== 'string') return false;
+      // v1.0 schema uses 'prompt', old schema uses 'character'
+      if (!a.character && !a.prompt) return false;
       if (!a.testId && !a.test_id) return false;
       return true;
     });
@@ -131,17 +135,21 @@ export async function parseAndImport(jsonString: string, fileName: string): Prom
           );
 
           if (!existing) {
-            // Normalize field names
+            // Normalize field names (handle v1.0 schema fields)
             const normalizedAttempt: CharacterAttempt = {
               id: attempt.id,
               testId: attempt.testId || attempt.test_id,
               timestamp: attempt.timestamp ? (typeof attempt.timestamp === 'string' ? new Date(attempt.timestamp).getTime() : attempt.timestamp) : Date.now(),
-              character: attempt.character,
+              // v1.0 uses 'prompt', old schema uses 'character'
+              character: attempt.character || attempt.prompt,
               scriptType: attempt.scriptType || attempt.script_type || 'hiragana',
               characterType: attempt.characterType || attempt.character_type || null,
-              userAnswer: attempt.userAnswer || attempt.user_answer || '',
-              correctAnswers: attempt.correctAnswers || attempt.correct_answers || [],
-              isCorrect: attempt.isCorrect !== undefined ? attempt.isCorrect : (attempt.is_correct !== undefined ? attempt.is_correct : false),
+              // v1.0 uses 'response', old schema uses 'userAnswer'
+              userAnswer: attempt.userAnswer || attempt.user_answer || attempt.response || '',
+              // v1.0 uses 'expected', old schema uses 'correctAnswers'
+              correctAnswers: attempt.correctAnswers || attempt.correct_answers || attempt.expected || [],
+              // v1.0 uses 'correct', old schema uses 'isCorrect'
+              isCorrect: attempt.isCorrect !== undefined ? attempt.isCorrect : (attempt.is_correct !== undefined ? attempt.is_correct : (attempt.correct !== undefined ? attempt.correct : false)),
               questionType: attempt.questionType || attempt.question_type || '1-char',
               jlptLevel: attempt.jlptLevel || attempt.jlpt_level || null,
               readingType: attempt.readingType || attempt.reading_type || null
@@ -211,7 +219,7 @@ export async function importFromFile(): Promise<ImportResult | null> {
     const fileName = result.assets[0].name;
 
     // Read file content
-    const jsonContent = await FileSystem.readAsStringAsync(fileUri);
+    const jsonContent = await readAsStringAsync(fileUri);
 
     // Parse and import
     return await parseAndImport(jsonContent, fileName);
@@ -235,45 +243,48 @@ export async function exportToFile(): Promise<string | null> {
     const tests = await getTests();
     const attempts = await getCharacterAttempts();
 
-    // Create export data (compatible with web version)
+    // Create export data in v1.0 schema format
     const exportData = {
       version: '1.0',
       exportedAt: new Date().toISOString(),
       tests: tests.map(test => ({
         id: test.id,
-        date: test.date,
+        timestamp: new Date(test.date).toISOString(),
+        testType: (test.testType || 'hiragana').toLowerCase(),
         score: test.score,
-        category: test.category,
-        description: test.description,
-        testType: test.testType,
-        jlptLevel: test.jlptLevel,
-        numQuestions: test.numQuestions,
-        createdAt: test.createdAt,
-        updatedAt: test.updatedAt
+        totalQuestions: test.numQuestions || 0,
+        correctAnswers: Math.round((test.score / 100) * (test.numQuestions || 0)),
+        jlptLevel: test.jlptLevel || undefined,
+        difficulty: test.category || undefined
       })),
-      characterAttempts: attempts.map(attempt => ({
+      attempts: attempts.map(attempt => ({
         id: attempt.id,
         testId: attempt.testId,
-        timestamp: attempt.timestamp,
-        character: attempt.character,
-        scriptType: attempt.scriptType,
-        characterType: attempt.characterType,
-        userAnswer: attempt.userAnswer,
-        correctAnswers: attempt.correctAnswers,
-        isCorrect: attempt.isCorrect,
-        questionType: attempt.questionType,
-        jlptLevel: attempt.jlptLevel,
-        readingType: attempt.readingType
-      }))
+        timestamp: new Date(attempt.timestamp).toISOString(),
+        prompt: attempt.character,
+        expected: Array.isArray(attempt.correctAnswers) ? attempt.correctAnswers : [attempt.correctAnswers],
+        response: attempt.userAnswer,
+        correct: attempt.isCorrect,
+        scriptType: attempt.scriptType || undefined,
+        jlptLevel: attempt.jlptLevel || undefined,
+        characterType: attempt.characterType || undefined
+      })),
+      settings: {
+        romajiSystem: 'hepburn'
+      },
+      meta: {
+        exportedBy: 'claude',
+        platform: 'mobile'
+      }
     };
 
     // Create filename with timestamp
     const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, -5);
     const filename = `japanese-learning-mobile-${timestamp}.json`;
-    const fileUri = FileSystem.documentDirectory + filename;
+    const fileUri = documentDirectory + filename;
 
     // Write to file
-    await FileSystem.writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
+    await writeAsStringAsync(fileUri, JSON.stringify(exportData, null, 2));
 
     // Share file
     if (await Sharing.isAvailableAsync()) {
