@@ -22,12 +22,7 @@
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "minSdkVersion": 23,
-      "targetSdkVersion": 34,
-      "compileSdkVersion": 34,
-      "package": "com.claude.japaneselearning",
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "package": "com.claude.japaneselearning"
     },
     "web": {
       "bundler": "metro",
@@ -40,6 +35,12 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "f2763809-e095-48e3-aa1b-c2eb520cbd58"
+      }
     }
   }
 }
