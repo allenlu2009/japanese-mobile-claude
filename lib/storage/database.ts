@@ -83,19 +83,26 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
     `);
 
     // Copy data from old table, handling column name variations
-    // Prefer timestamp over date (date might be NULL in old schema)
-    const oldDateCol = columnNames.includes('timestamp') ? 'timestamp' :
-                       columnNames.includes('date') ? 'date' :
-                       'timestamp';
+    // Build COALESCE expressions that only reference columns that exist
+    let dateExpression;
+    if (columnNames.includes('timestamp') && columnNames.includes('date')) {
+      dateExpression = 'COALESCE(timestamp, date, 0)';
+    } else if (columnNames.includes('timestamp')) {
+      dateExpression = 'timestamp';
+    } else if (columnNames.includes('date')) {
+      dateExpression = 'date';
+    } else {
+      dateExpression = '0';
+    }
 
     const oldNumQuestionsCol = columnNames.includes('num_questions') ? 'num_questions' :
                                 columnNames.includes('total_questions') ? 'total_questions' :
                                 columnNames.includes('num_quiestions') ? 'num_quiestions' :
-                                'num_questions';
+                                '0';
 
     const selectColumns = [
       'id',
-      `COALESCE(timestamp, date, 0) as date`,  // Use timestamp first, fallback to date, then 0
+      `${dateExpression} as date`,
       'score',
       columnNames.includes('category') ? 'category' : `'read' as category`,
       columnNames.includes('description') ? 'description' : `test_type || ' - ' || score || '%' as description`,
@@ -103,8 +110,8 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
       'jlpt_level',
       `${oldNumQuestionsCol} as num_questions`,
       columnNames.includes('source') ? 'source' : `'mobile' as source`,
-      columnNames.includes('created_at') ? 'created_at' : `COALESCE(timestamp, date, 0) as created_at`,
-      columnNames.includes('updated_at') ? 'updated_at' : `COALESCE(timestamp, date, 0) as updated_at`
+      columnNames.includes('created_at') ? 'created_at' : `${dateExpression} as created_at`,
+      columnNames.includes('updated_at') ? 'updated_at' : `${dateExpression} as updated_at`
     ].join(', ');
 
     await database.execAsync(`
