@@ -183,9 +183,11 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
     const userAnswerCol = attemptsColumnNames.includes('user_answer') ? 'user_answer' :
                           attemptsColumnNames.includes('response') ? 'response' : 'user_answer';
     const correctAnswersCol = attemptsColumnNames.includes('correct_answers') ? 'correct_answers' :
-                              attemptsColumnNames.includes('expected') ? 'expected' : 'correct_answers';
+                              attemptsColumnNames.includes('expected_json') ? 'expected_json' :
+                              attemptsColumnNames.includes('expected') ? 'expected' :
+                              `'[]' as correct_answers_fallback`;
     const isCorrectCol = attemptsColumnNames.includes('is_correct') ? 'is_correct' :
-                         attemptsColumnNames.includes('correct') ? 'correct' : 'is_correct';
+                         attemptsColumnNames.includes('correct') ? 'correct' : '0';
 
     const attemptsSelectColumns = [
       'id',
