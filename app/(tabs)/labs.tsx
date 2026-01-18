@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, ScrollView, TouchableOpacity, Switch, Alert } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, Switch } from 'react-native';
 import { getSettings, saveSettings, type AppSettings } from '../../lib/storage/settingsStorage';
-import { clearAllData, getTestCount, getCharacterAttemptCount } from '../../lib/storage/testStorage';
 
 export default function LabsScreen() {
   const [settings, setSettings] = useState<AppSettings>({
@@ -11,23 +10,15 @@ export default function LabsScreen() {
     autoAdvance: false,
     theme: 'light'
   });
-  const [testCount, setTestCount] = useState(0);
-  const [attemptCount, setAttemptCount] = useState(0);
 
   useEffect(() => {
-    loadData();
+    loadSettings();
   }, []);
 
-  async function loadData() {
+  async function loadSettings() {
     try {
-      const [savedSettings, tests, attempts] = await Promise.all([
-        getSettings(),
-        getTestCount(),
-        getCharacterAttemptCount()
-      ]);
+      const savedSettings = await getSettings();
       setSettings(savedSettings);
-      setTestCount(tests);
-      setAttemptCount(attempts);
     } catch (error) {
       console.error('Failed to load settings:', error);
     }
@@ -41,30 +32,6 @@ export default function LabsScreen() {
     } catch (error) {
       console.error('Failed to save settings:', error);
     }
-  }
-
-  function confirmClearData() {
-    Alert.alert(
-      'Clear All Data',
-      `This will permanently delete ${testCount} tests and ${attemptCount} character attempts. This action cannot be undone.`,
-      [
-        { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Clear Data',
-          style: 'destructive',
-          onPress: async () => {
-            try {
-              await clearAllData();
-              setTestCount(0);
-              setAttemptCount(0);
-              Alert.alert('Success', 'All data has been cleared');
-            } catch (error: any) {
-              Alert.alert('Error', error.message);
-            }
-          }
-        }
-      ]
-    );
   }
 
   return (
@@ -156,33 +123,6 @@ export default function LabsScreen() {
                   onValueChange={(value) => updateSetting('hapticsEnabled', value)}
                 />
               </View>
-            </View>
-          </View>
-
-          {/* Data Management */}
-          <View className="gap-3">
-            <Text className="text-lg font-semibold text-slate-900">
-              Data Management
-            </Text>
-
-            <View className="rounded-2xl border border-slate-200 bg-white p-4">
-              <View className="mb-4">
-                <Text className="text-sm font-medium text-slate-700 mb-1">
-                  Local Storage
-                </Text>
-                <Text className="text-xs text-slate-500">
-                  {testCount} tests, {attemptCount} character attempts
-                </Text>
-              </View>
-
-              <TouchableOpacity
-                onPress={confirmClearData}
-                className="rounded-xl bg-red-50 border border-red-200 p-4 active:bg-red-100"
-              >
-                <Text className="text-center font-semibold text-red-600">
-                  🗑️ Clear All Data
-                </Text>
-              </TouchableOpacity>
             </View>
           </View>
 
