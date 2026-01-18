@@ -4,12 +4,15 @@ export type TestCategory = 'read' | 'listen' | 'write' | 'speak';
 // Main test interface
 export interface Test {
   id: string;                    // UUID
-  date: string;                  // ISO date string
+  date: string | number;         // ISO date string or epoch timestamp
   score: number;                 // 0-100 scale
   category: TestCategory;
   description: string;
-  createdAt: string;             // ISO timestamp
-  updatedAt: string;             // ISO timestamp
+  testType: string;              // Test type: 'hiragana', 'katakana', 'kanji', 'vocabulary'
+  jlptLevel: string | null;      // JLPT level: 'N5', 'N4', or null
+  numQuestions: number;          // Number of questions in the test
+  createdAt: string | number;    // ISO timestamp or epoch
+  updatedAt: string | number;    // ISO timestamp or epoch
 }
 
 // Form input interface (before validation)
