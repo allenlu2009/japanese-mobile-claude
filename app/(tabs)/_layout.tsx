@@ -1,5 +1,5 @@
 import { Tabs } from 'expo-router';
-import { Home, FlaskConical, BarChart3, Database, BarChart2, BookOpen } from 'lucide-react-native';
+import { Home, Settings, BarChart3, BarChart2, BookOpen } from 'lucide-react-native';
 
 export default function TabLayout() {
   return (
@@ -37,17 +37,16 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="data"
-        options={{
-          title: 'Data',
-          tabBarIcon: ({ color, size }) => <Database color={color} size={size} />,
-        }}
-      />
-      <Tabs.Screen
         name="labs"
         options={{
           title: 'Settings',
-          tabBarIcon: ({ color, size }) => <FlaskConical color={color} size={size} />,
+          tabBarIcon: ({ color, size }) => <Settings color={color} size={size} />,
+        }}
+      />
+      <Tabs.Screen
+        name="data"
+        options={{
+          href: null,
         }}
       />
     </Tabs>

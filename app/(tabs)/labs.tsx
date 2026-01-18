@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
-import { View, Text, SafeAreaView, ScrollView, Switch } from 'react-native';
+import { View, Text, SafeAreaView, ScrollView, Switch, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { getSettings, saveSettings, type AppSettings } from '../../lib/storage/settingsStorage';
+import { importFromFile, exportToFile, getImportHistory, type ImportHistoryEntry } from '../../lib/storage/importExport';
+import { getTestCount, getCharacterAttemptCount } from '../../lib/storage/testStorage';
 
 export default function LabsScreen() {
   const [settings, setSettings] = useState<AppSettings>({
@@ -10,17 +12,30 @@ export default function LabsScreen() {
     autoAdvance: false,
     theme: 'light'
   });
+  const [importing, setImporting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [history, setHistory] = useState<ImportHistoryEntry[]>([]);
+  const [testCount, setTestCount] = useState(0);
+  const [attemptCount, setAttemptCount] = useState(0);
 
   useEffect(() => {
-    loadSettings();
+    loadAll();
   }, []);
 
-  async function loadSettings() {
+  async function loadAll() {
     try {
-      const savedSettings = await getSettings();
+      const [savedSettings, historyData, tests, attempts] = await Promise.all([
+        getSettings(),
+        getImportHistory(),
+        getTestCount(),
+        getCharacterAttemptCount()
+      ]);
       setSettings(savedSettings);
+      setHistory(historyData);
+      setTestCount(tests);
+      setAttemptCount(attempts);
     } catch (error) {
-      console.error('Failed to load settings:', error);
+      console.error('Failed to load data:', error);
     }
   }
 
@@ -31,6 +46,58 @@ export default function LabsScreen() {
       await saveSettings(newSettings);
     } catch (error) {
       console.error('Failed to save settings:', error);
+    }
+  }
+
+  async function handleImport() {
+    setImporting(true);
+    try {
+      const result = await importFromFile();
+
+      if (!result) {
+        return; // User cancelled
+      }
+
+      if (result.errors.length > 0) {
+        Alert.alert('Import Failed', `Errors:\n${result.errors.join('\n')}`, [{ text: 'OK' }]);
+      } else if (result.warnings.length > 0) {
+        Alert.alert(
+          'Import Completed with Warnings',
+          `✅ Imported ${result.testsImported} tests and ${result.attemptsImported} attempts\n\n⚠️ Warnings:\n${result.warnings.join('\n')}`,
+          [{ text: 'OK', onPress: loadAll }]
+        );
+      } else {
+        Alert.alert(
+          'Import Successful!',
+          `✅ Imported ${result.testsImported} tests and ${result.attemptsImported} character attempts`,
+          [{ text: 'OK', onPress: loadAll }]
+        );
+      }
+    } catch (error: any) {
+      Alert.alert('Import Error', error.message);
+    } finally {
+      setImporting(false);
+    }
+  }
+
+  async function handleExport() {
+    setExporting(true);
+    try {
+      const fileUri = await exportToFile();
+
+      if (fileUri) {
+        Alert.alert(
+          'Export Successful!',
+          'Your data has been exported. You can now share or save the file.',
+          [{ text: 'OK' }]
+        );
+      } else {
+        Alert.alert('Export Failed', 'Could not export data. Please try again.');
+      }
+    } catch (error: any) {
+      Alert.alert('Export Error', error.message);
+    } finally {
+      setExporting(false);
     }
   }
 
@@ -124,6 +191,111 @@ export default function LabsScreen() {
                 />
               </View>
             </View>
+          </View>
+
+          {/* Data Management */}
+          <View className="gap-3">
+            <Text className="text-lg font-semibold text-slate-900">
+              Data Management
+            </Text>
+
+            {/* Stats Card */}
+            <View className="rounded-2xl border border-slate-200 bg-white p-4">
+              <Text className="text-sm font-semibold text-slate-600 mb-3">
+                Current Data
+              </Text>
+              <View className="flex-row justify-between">
+                <View>
+                  <Text className="text-2xl font-bold text-slate-900">{testCount}</Text>
+                  <Text className="text-sm text-slate-500">Tests</Text>
+                </View>
+                <View>
+                  <Text className="text-2xl font-bold text-slate-900">{attemptCount}</Text>
+                  <Text className="text-sm text-slate-500">Attempts</Text>
+                </View>
+              </View>
+            </View>
+
+            {/* Import Button */}
+            <TouchableOpacity
+              className="rounded-2xl bg-blue-500 p-4 active:bg-blue-600"
+              onPress={handleImport}
+              disabled={importing}
+            >
+              {importing ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text className="text-center text-base font-semibold text-white">
+                  📁 Import Data
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Export Button */}
+            <TouchableOpacity
+              className="rounded-2xl border-2 border-blue-500 bg-white p-4 active:bg-blue-50"
+              onPress={handleExport}
+              disabled={exporting}
+            >
+              {exporting ? (
+                <ActivityIndicator color="#3b82f6" />
+              ) : (
+                <Text className="text-center text-base font-semibold text-blue-500">
+                  💾 Export Data
+                </Text>
+              )}
+            </TouchableOpacity>
+
+            {/* Import History */}
+            {history.length > 0 && (
+              <View className="gap-2">
+                <Text className="text-sm font-medium text-slate-700">Recent Imports</Text>
+                {history.slice(0, 3).map((entry) => {
+                  const hasWarnings = entry.warnings && JSON.parse(entry.warnings).length > 0;
+                  const hasErrors = entry.errors && JSON.parse(entry.errors).length > 0;
+
+                  return (
+                    <View
+                      key={entry.id}
+                      className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                    >
+                      <View className="flex-row items-start justify-between mb-1">
+                        <Text className="text-xs font-medium text-slate-700 flex-1">
+                          {entry.fileName}
+                        </Text>
+                        <Text className="text-xs text-slate-400">
+                          {new Date(entry.importDate).toLocaleDateString()}
+                        </Text>
+                      </View>
+
+                      <View className="flex-row gap-3">
+                        <Text className="text-xs text-slate-500">
+                          {entry.testsImported} tests
+                        </Text>
+                        <Text className="text-xs text-slate-500">
+                          {entry.attemptsImported} attempts
+                        </Text>
+                      </View>
+
+                      {(hasWarnings || hasErrors) && (
+                        <View className="mt-1">
+                          {hasErrors && (
+                            <Text className="text-xs text-red-600">
+                              ❌ {JSON.parse(entry.errors).length} errors
+                            </Text>
+                          )}
+                          {hasWarnings && (
+                            <Text className="text-xs text-yellow-600">
+                              ⚠️ {JSON.parse(entry.warnings).length} warnings
+                            </Text>
+                          )}
+                        </View>
+                      )}
+                    </View>
+                  );
+                })}
+              </View>
+            )}
           </View>
 
           {/* About */}
