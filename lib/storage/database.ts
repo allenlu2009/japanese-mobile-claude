@@ -127,6 +127,16 @@ async function runMigrations(database: SQLite.SQLiteDatabase): Promise<void> {
   }
 
   // Migrate character_attempts table if needed
+  const attemptsTables = await database.getAllAsync<{ name: string }>(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name='character_attempts'`
+  );
+
+  if (attemptsTables.length === 0) {
+    // Table doesn't exist yet, skip migrations
+    console.log('📋 character_attempts table does not exist yet, skipping migration');
+    return;
+  }
+
   const attemptsTableInfo = await database.getAllAsync<{ name: string }>(
     `PRAGMA table_info(character_attempts)`
   );
@@ -219,11 +229,17 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
 
   db = await SQLite.openDatabaseAsync(DB_NAME);
 
-  // Create tables
+  // Set pragmas
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
     PRAGMA foreign_keys = ON;
+  `);
 
+  // Run migrations FIRST (before creating tables)
+  await runMigrations(db);
+
+  // Create tables (only if they don't exist)
+  await db.execAsync(`
     -- Tests table
     CREATE TABLE IF NOT EXISTS tests (
       id TEXT PRIMARY KEY,
@@ -307,9 +323,6 @@ export async function initDatabase(): Promise<SQLite.SQLiteDatabase> {
     INSERT OR IGNORE INTO app_settings (key, value) VALUES ('notifications_enabled', 'true');
     INSERT OR IGNORE INTO app_settings (key, value) VALUES ('reminder_time', '20:00');
   `);
-
-  // Run migrations to update existing databases
-  await runMigrations(db);
 
   console.log('✅ Database initialized successfully');
   return db;
