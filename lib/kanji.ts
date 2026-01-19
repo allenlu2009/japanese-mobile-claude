@@ -12,7 +12,7 @@
 
 import kanjiN5Data from '@/data/processed/kanji-n5.json';
 import kanjiN4Data from '@/data/processed/kanji-n4.json';
-import kanjiN3Data from '@/data/processed/kanji-n3.json';
+import kanjiN3DataRaw from '@/data/processed/kanji-n3.json';
 
 export interface KanjiChar {
   character: string;           // The kanji character
@@ -25,6 +25,8 @@ export interface KanjiChar {
 // Load kanji data from JSON files
 export const KANJI_N5: KanjiChar[] = kanjiN5Data as KanjiChar[];
 export const KANJI_N4: KanjiChar[] = kanjiN4Data as KanjiChar[];
+// Extract kanji array from N3 meta wrapper
+const kanjiN3Data = (kanjiN3DataRaw as any).kanji;
 export const KANJI_N3: KanjiChar[] = kanjiN3Data as KanjiChar[];
 
 // Cumulative arrays (each level includes all previous levels)

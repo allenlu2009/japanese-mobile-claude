@@ -16,6 +16,7 @@ interface Question {
   id: string;
   characters: string;
   correctAnswers: string[];
+  meanings?: string[];           // English meanings (for kanji/vocabulary)
   userAnswer?: string;
   isCorrect?: boolean;
 }
@@ -63,23 +64,25 @@ export default function TestScreen() {
           generatedQuestions = generateKatakanaQuestions('1-char', numQuestions, 'all');
           break;
         case 'kanji':
-          const kanjiQuestions = generateKanjiQuestions(numQuestions, 'N5', 'mixed', true);
+          const kanjiQuestions = generateKanjiQuestions(numQuestions, 'N4', 'mixed', true);
           // Map KanjiQuestion to Question interface
           generatedQuestions = kanjiQuestions.map(q => ({
             id: q.id,
             characters: q.kanji,
             correctAnswers: q.correctAnswers,
+            meanings: q.meanings,      // Include English meanings
             userAnswer: q.userAnswer,
             isCorrect: q.isCorrect
           }));
           break;
         case 'vocabulary':
-          const vocabQuestions = generateVocabularyQuestions(numQuestions, 'N5', true);
+          const vocabQuestions = generateVocabularyQuestions(numQuestions, 'N4', true);
           // Map VocabularyQuestion to Question interface
           generatedQuestions = vocabQuestions.map(q => ({
             id: q.id,
             characters: q.word,
             correctAnswers: q.correctAnswers,
+            meanings: [q.meaning],     // Wrap in array for consistency
             userAnswer: q.userAnswer,
             isCorrect: q.isCorrect
           }));
@@ -259,6 +262,13 @@ export default function TestScreen() {
                 </TouchableOpacity>
               )}
             </View>
+
+            {/* English meanings hint for kanji/vocabulary */}
+            {(testType === 'kanji' || testType === 'vocabulary') && currentQuestion.meanings && currentQuestion.meanings.length > 0 && (
+              <Text className="text-sm text-slate-500 mt-2 text-center px-4">
+                ({currentQuestion.meanings.join(', ')})
+              </Text>
+            )}
           </View>
 
           {/* Answer Input */}

@@ -1,7 +1,7 @@
 /**
  * Vocabulary Test Generator
  *
- * Generates vocabulary reading test questions for JLPT levels (N5, N4).
+ * Generates vocabulary reading test questions for JLPT levels (N5, N4, N3).
  * Tests recognition of kanji+kana words and their romanji readings.
  *
  * Pattern: Follows the structure of kanjiTestGenerator.ts for consistency
@@ -30,8 +30,8 @@ export interface VocabularyQuestion {
  * Generate vocabulary reading test questions
  *
  * @param count - Number of questions to generate
- * @param level - JLPT level ('N5' or 'N4')
- * @param includeN5 - For N4 tests: include N5 vocabulary (true) or N4-only (false). Ignored for N5 tests.
+ * @param level - JLPT level ('N5', 'N4', or 'N3')
+ * @param includeLower - Include lower levels: true (default) or false (level-only)
  * @returns Array of vocabulary questions
  *
  * @example
@@ -40,6 +40,9 @@ export interface VocabularyQuestion {
  *
  * const questions = generateVocabularyQuestions(10, 'N4', false);
  * // Generates 10 N4-only vocabulary questions (excludes N5)
+ *
+ * const questions = generateVocabularyQuestions(10, 'N3', true);
+ * // Generates 10 N3 vocabulary questions (includes N5 + N4 + N3)
  */
 export function generateVocabularyQuestions(
   count: number,

@@ -20,7 +20,7 @@ export type KanjiReadingMode = 'onyomi' | 'kunyomi' | 'mixed';
 /**
  * JLPT difficulty levels
  */
-export type JLPTLevel = 'N5' | 'N4';
+export type JLPTLevel = 'N5' | 'N4' | 'N3';
 
 /**
  * Kanji question interface

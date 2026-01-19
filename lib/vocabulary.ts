@@ -12,7 +12,7 @@
 
 import vocabularyN5Data from '@/data/processed/vocabulary-n5.json';
 import vocabularyN4Data from '@/data/processed/vocabulary-n4.json';
-import vocabularyN3Data from '@/data/processed/vocabulary-n3.json';
+import vocabularyN3DataRaw from '@/data/processed/vocabulary-n3.json';
 
 export interface VocabularyWord {
   word: string;               // Kanji form (may include kana)
@@ -25,6 +25,8 @@ export interface VocabularyWord {
 // Load vocabulary data from JSON files
 export const VOCABULARY_N5: VocabularyWord[] = vocabularyN5Data as VocabularyWord[];
 export const VOCABULARY_N4: VocabularyWord[] = vocabularyN4Data as VocabularyWord[];
+// Extract words array from N3 meta wrapper
+const vocabularyN3Data = (vocabularyN3DataRaw as any).words;
 export const VOCABULARY_N3: VocabularyWord[] = vocabularyN3Data as VocabularyWord[];
 
 // Cumulative arrays (each level includes all previous levels)
