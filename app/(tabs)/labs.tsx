@@ -10,7 +10,9 @@ export default function LabsScreen() {
     hapticsEnabled: true,
     showHints: true,
     autoAdvance: false,
-    theme: 'light'
+    theme: 'light',
+    jlptLevel: 'N4',
+    includeLowerLevels: true
   });
   const [importing, setImporting] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -122,6 +124,57 @@ export default function LabsScreen() {
             </Text>
 
             <View className="rounded-2xl border border-slate-200 bg-white overflow-hidden">
+              {/* JLPT Level Selection */}
+              <View className="p-4 border-b border-slate-100">
+                <Text className="text-sm font-medium text-slate-700 mb-3">
+                  JLPT Level
+                </Text>
+                <View className="flex-row gap-2">
+                  {(['N5', 'N4', 'N3'] as const).map((level) => (
+                    <TouchableOpacity
+                      key={level}
+                      className={`flex-1 rounded-xl p-3 border-2 ${
+                        settings.jlptLevel === level
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 bg-white'
+                      }`}
+                      onPress={() => updateSetting('jlptLevel', level)}
+                    >
+                      <Text
+                        className={`text-center font-semibold ${
+                          settings.jlptLevel === level
+                            ? 'text-blue-600'
+                            : 'text-slate-600'
+                        }`}
+                      >
+                        {level}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                <Text className="text-xs text-slate-500 mt-2">
+                  Select your target JLPT difficulty level
+                </Text>
+              </View>
+
+              {/* Include Lower Levels */}
+              <View className="flex-row items-center justify-between p-4 border-b border-slate-100">
+                <View className="flex-1">
+                  <Text className="text-sm font-medium text-slate-700">
+                    Include Lower Levels
+                  </Text>
+                  <Text className="text-xs text-slate-500 mt-1">
+                    {settings.includeLowerLevels
+                      ? 'Includes all easier levels for practice'
+                      : 'Only shows selected level (exclusive)'}
+                  </Text>
+                </View>
+                <Switch
+                  value={settings.includeLowerLevels}
+                  onValueChange={(value) => updateSetting('includeLowerLevels', value)}
+                />
+              </View>
+
               <View className="flex-row items-center justify-between p-4 border-b border-slate-100">
                 <View className="flex-1">
                   <Text className="text-sm font-medium text-slate-700">

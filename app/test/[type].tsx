@@ -64,7 +64,12 @@ export default function TestScreen() {
           generatedQuestions = generateKatakanaQuestions('1-char', numQuestions, 'all');
           break;
         case 'kanji':
-          const kanjiQuestions = generateKanjiQuestions(numQuestions, 'N4', 'mixed', true);
+          const kanjiQuestions = generateKanjiQuestions(
+            numQuestions,
+            settings.jlptLevel,
+            'mixed',
+            settings.includeLowerLevels
+          );
           // Map KanjiQuestion to Question interface
           generatedQuestions = kanjiQuestions.map(q => ({
             id: q.id,
@@ -76,7 +81,11 @@ export default function TestScreen() {
           }));
           break;
         case 'vocabulary':
-          const vocabQuestions = generateVocabularyQuestions(numQuestions, 'N4', true);
+          const vocabQuestions = generateVocabularyQuestions(
+            numQuestions,
+            settings.jlptLevel,
+            settings.includeLowerLevels
+          );
           // Map VocabularyQuestion to Question interface
           generatedQuestions = vocabQuestions.map(q => ({
             id: q.id,

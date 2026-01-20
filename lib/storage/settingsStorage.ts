@@ -6,6 +6,8 @@ export interface AppSettings {
   showHints: boolean;
   autoAdvance: boolean;
   theme: 'light' | 'dark';
+  jlptLevel: 'N5' | 'N4' | 'N3';
+  includeLowerLevels: boolean;
 }
 
 /**
@@ -43,7 +45,9 @@ export async function getSettings(): Promise<AppSettings> {
     hapticsEnabled: (await getSetting('haptics_enabled', 'true')) === 'true',
     showHints: (await getSetting('show_hints', 'true')) === 'true',
     autoAdvance: (await getSetting('auto_advance', 'false')) === 'true',
-    theme: (await getSetting('theme', 'light')) as 'light' | 'dark'
+    theme: (await getSetting('theme', 'light')) as 'light' | 'dark',
+    jlptLevel: (await getSetting('jlpt_level', 'N4')) as 'N5' | 'N4' | 'N3',
+    includeLowerLevels: (await getSetting('include_lower_levels', 'true')) === 'true'
   };
 }
 
@@ -56,6 +60,8 @@ export async function saveSettings(settings: AppSettings): Promise<void> {
   await setSetting('show_hints', settings.showHints.toString());
   await setSetting('auto_advance', settings.autoAdvance.toString());
   await setSetting('theme', settings.theme);
+  await setSetting('jlpt_level', settings.jlptLevel);
+  await setSetting('include_lower_levels', settings.includeLowerLevels.toString());
 }
 
 /**
@@ -76,5 +82,11 @@ export async function updateSettings(settings: Partial<AppSettings>): Promise<vo
   }
   if (settings.theme !== undefined) {
     await setSetting('theme', settings.theme);
+  }
+  if (settings.jlptLevel !== undefined) {
+    await setSetting('jlpt_level', settings.jlptLevel);
+  }
+  if (settings.includeLowerLevels !== undefined) {
+    await setSetting('include_lower_levels', settings.includeLowerLevels.toString());
   }
 }
