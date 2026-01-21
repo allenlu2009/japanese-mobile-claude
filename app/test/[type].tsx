@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { View, Text, SafeAreaView, TextInput, TouchableOpacity, Alert, Keyboard } from 'react-native';
+import { View, Text, SafeAreaView, TextInput, TouchableOpacity, Alert, Keyboard, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { generateQuestions } from '../../lib/testGenerator';
 import { generateKatakanaQuestions } from '../../lib/katakanaTestGenerator';
@@ -233,27 +233,37 @@ export default function TestScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 px-6 py-8">
-        {/* Progress Bar */}
-        <View className="mb-6">
-          <View className="flex-row justify-between mb-2">
-            <Text className="text-sm font-semibold text-slate-700">
-              Question {currentIndex + 1} of {questions.length}
-            </Text>
-            <Text className="text-sm text-slate-500">
-              {results.filter(r => r.isCorrect).length} correct
-            </Text>
-          </View>
-          <View className="h-2 bg-slate-100 rounded-full overflow-hidden">
-            <View
-              className="h-full bg-blue-500 rounded-full"
-              style={{ width: `${progress}%` }}
-            />
-          </View>
-        </View>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
+        keyboardVerticalOffset={0}
+      >
+        <ScrollView
+          className="flex-1"
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View className="px-6 py-8">
+            {/* Progress Bar */}
+            <View className="mb-6">
+              <View className="flex-row justify-between mb-2">
+                <Text className="text-sm font-semibold text-slate-700">
+                  Question {currentIndex + 1} of {questions.length}
+                </Text>
+                <Text className="text-sm text-slate-500">
+                  {results.filter(r => r.isCorrect).length} correct
+                </Text>
+              </View>
+              <View className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                <View
+                  className="h-full bg-blue-500 rounded-full"
+                  style={{ width: `${progress}%` }}
+                />
+              </View>
+            </View>
 
-        {/* Question */}
-        <View className="flex-1 justify-start pt-8 gap-8">
+            {/* Question */}
+            <View className="justify-start pt-8 gap-8">
           <View className="items-center gap-3">
             <Text className="text-xs uppercase tracking-[0.3em] text-slate-400">
               What is the romaji?
@@ -350,6 +360,8 @@ export default function TestScreen() {
           </View>
         </View>
       </View>
+    </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
