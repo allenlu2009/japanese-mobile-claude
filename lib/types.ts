@@ -108,7 +108,7 @@ export interface CharacterAttempt {
   scriptType: ScriptType;        // Hiragana, Katakana, Kanji, or Vocabulary
   characterType: 'basic' | 'dakuten' | 'combo';
   userAnswer: string;            // What user typed
-  correctAnswers: string[];      // Valid romanji options
+  correctAnswers: string[];      // Valid romaji options
   isCorrect: boolean;            // Was the answer correct?
   questionType: QuestionType;    // Question type
   sequencePosition?: number;     // For 3-char: position (0, 1, 2)

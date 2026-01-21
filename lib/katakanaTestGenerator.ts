@@ -28,7 +28,7 @@ export function generateKatakanaQuestions(
       questions.push({
         id: uuidv4(),
         characters: katakana.katakana,
-        correctAnswers: katakana.romanji,
+        correctAnswers: katakana.romaji,
       });
     } else {
       // 3-char: generate sequence
@@ -37,11 +37,11 @@ export function generateKatakanaQuestions(
       const char3 = getRandomKatakana(difficulty);
       const sequence = char1.katakana + char2.katakana + char3.katakana;
 
-      // Generate all romanji combinations
+      // Generate all romaji combinations
       const combinations = generateRomanjiCombinations([
-        char1.romanji,
-        char2.romanji,
-        char3.romanji
+        char1.romaji,
+        char2.romaji,
+        char3.romaji
       ]);
 
       questions.push({
@@ -55,11 +55,11 @@ export function generateKatakanaQuestions(
   return questions;
 }
 
-function generateRomanjiCombinations(romanjiArrays: string[][]): string[] {
-  if (romanjiArrays.length === 0) return [''];
-  if (romanjiArrays.length === 1) return romanjiArrays[0];
+function generateRomanjiCombinations(romajiArrays: string[][]): string[] {
+  if (romajiArrays.length === 0) return [''];
+  if (romajiArrays.length === 1) return romajiArrays[0];
 
-  const [first, ...rest] = romanjiArrays;
+  const [first, ...rest] = romajiArrays;
   const restCombinations = generateRomanjiCombinations(rest);
 
   const result: string[] = [];

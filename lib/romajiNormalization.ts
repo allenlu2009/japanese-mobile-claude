@@ -1,7 +1,7 @@
 /**
  * Romanji Normalization Utilities
  *
- * Handles various romanji spelling variants to provide a better user experience
+ * Handles various romaji spelling variants to provide a better user experience
  * in kanji and vocabulary tests. Accepts common alternative spellings like:
  * - Long vowels: "ō" vs "ou" vs "o"
  * - Double consonants: "nn" vs "n"
@@ -20,7 +20,7 @@ const LONG_VOWEL_RULES: Record<string, string[]> = {
 };
 
 /**
- * Common romanji syllable variants
+ * Common romaji syllable variants
  * Maps canonical form to all accepted variants
  */
 const SYLLABLE_VARIANTS: Record<string, string[]> = {
@@ -51,14 +51,14 @@ const SYLLABLE_VARIANTS: Record<string, string[]> = {
 };
 
 /**
- * Normalize a romanji string to its base form (lowercase, trimmed)
+ * Normalize a romaji string to its base form (lowercase, trimmed)
  */
 function normalizeBase(input: string): string {
   return input.toLowerCase().trim();
 }
 
 /**
- * Expand a romanji string with long vowel variants
+ * Expand a romaji string with long vowel variants
  * Returns array of possible spellings with different long vowel representations
  */
 function expandLongVowels(input: string): string[] {
@@ -80,7 +80,7 @@ function expandLongVowels(input: string): string[] {
 }
 
 /**
- * Expand a romanji string with syllable variants
+ * Expand a romaji string with syllable variants
  * Returns array of possible spellings with different syllable representations
  */
 function expandSyllableVariants(input: string): string[] {
@@ -132,9 +132,9 @@ function expandDoubleN(input: string): string[] {
 }
 
 /**
- * Generate all possible normalized variants of a romanji string
+ * Generate all possible normalized variants of a romaji string
  *
- * @param input - The romanji string to normalize
+ * @param input - The romaji string to normalize
  * @returns Array of all possible variant spellings
  *
  * @example
@@ -165,8 +165,8 @@ export function normalizeRomanji(input: string): string[] {
  * Check if user input matches any of the valid answers
  * Uses normalization to accept reasonable spelling variants
  *
- * @param userInput - The user's romanji input
- * @param validAnswers - Array of acceptable romanji answers
+ * @param userInput - The user's romaji input
+ * @param validAnswers - Array of acceptable romaji answers
  * @returns true if user input matches any valid answer (with normalization)
  *
  * @example
@@ -196,10 +196,10 @@ export function isRomanjiMatch(userInput: string, validAnswers: string[]): boole
 }
 
 /**
- * Get the canonical (preferred) form of a romanji string
+ * Get the canonical (preferred) form of a romaji string
  * Useful for displaying the "correct" answer in a consistent format
  *
- * @param input - The romanji string
+ * @param input - The romaji string
  * @returns Canonical form (lowercase, using macrons for long vowels)
  */
 export function getCanonicalRomanji(input: string): string {

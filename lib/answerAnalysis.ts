@@ -116,7 +116,7 @@ export function countJapaneseCharacters(text: string): number {
  * (Custom greedy matching + resynchronization algorithm)
  *
  * @param hiraganaSequence - The hiragana characters shown (e.g., "かたな")
- * @param userAnswer - The user's romanji answer (e.g., "banana")
+ * @param userAnswer - The user's romaji answer (e.g., "banana")
  * @returns Array of analysis for each character
  */
 export function analyzeMultiCharAnswerWithSyllableMatching(
@@ -141,14 +141,14 @@ export function analyzeMultiCharAnswerWithSyllableMatching(
       };
     }
 
-    const isCorrect = hiraganaChar.romanji.some(
+    const isCorrect = hiraganaChar.romaji.some(
       valid => valid.toLowerCase() === userSyllable.toLowerCase()
     );
 
     return {
       character: char,
       userSyllable,
-      correctSyllables: hiraganaChar.romanji,
+      correctSyllables: hiraganaChar.romaji,
       isCorrect,
       position: index,
     };
@@ -160,7 +160,7 @@ export function analyzeMultiCharAnswerWithSyllableMatching(
  * GENERIC VERSION - Works with both hiragana and katakana
  *
  * @param japaneseSequence - The Japanese characters shown (e.g., "かたな" or "カタナ")
- * @param userAnswer - The user's romanji answer (e.g., "katana")
+ * @param userAnswer - The user's romaji answer (e.g., "katana")
  * @returns Array of analysis for each character
  */
 export function analyzeMultiCharAnswerWithSyllableMatchingGeneric(
@@ -187,14 +187,14 @@ export function analyzeMultiCharAnswerWithSyllableMatchingGeneric(
       };
     }
 
-    const isCorrect = japaneseChar.romanji.some(
+    const isCorrect = japaneseChar.romaji.some(
       valid => valid.toLowerCase() === userSyllable.toLowerCase()
     );
 
     return {
       character: char,
       userSyllable,
-      correctSyllables: japaneseChar.romanji,
+      correctSyllables: japaneseChar.romaji,
       isCorrect,
       position: index,
     };
@@ -206,7 +206,7 @@ export function analyzeMultiCharAnswerWithSyllableMatchingGeneric(
  * This is the main public API - dispatches to the appropriate implementation
  *
  * @param hiraganaSequence - The hiragana characters shown (e.g., "かたな")
- * @param userAnswer - The user's romanji answer (e.g., "banana")
+ * @param userAnswer - The user's romaji answer (e.g., "banana")
  * @returns Array of analysis for each character
  */
 export function analyzeMultiCharAnswer(

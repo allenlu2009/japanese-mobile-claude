@@ -21,7 +21,7 @@ import vocabularyN1DataRaw from '@/data/processed/vocabulary-n1.json';
 export interface VocabularyWord {
   word: string;               // Kanji form (may include kana)
   kana: string;              // Full hiragana reading
-  romanji: string[];         // Romanji variants (accepts multiple spellings)
+  romaji: string[];          // Romaji variants (accepts multiple spellings)
   meaning: string;           // English meaning
   jlptLevel: 'N5' | 'N4' | 'N3' | 'N2' | 'N1';   // JLPT difficulty level
 }

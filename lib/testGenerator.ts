@@ -34,7 +34,7 @@ export function generateQuestions(
       questions.push({
         id: uuidv4(),
         characters: char.hiragana,
-        correctAnswers: char.romanji,
+        correctAnswers: char.romaji,
         userAnswer: undefined,
         isCorrect: undefined,
       });
@@ -48,10 +48,10 @@ export function generateQuestions(
     for (let i = 0; i < count; i++) {
       const threeChars = getRandomHiragana(3, includeTypes);
       const characters = threeChars.map(c => c.hiragana).join('');
-      const romanjiParts = threeChars.map(c => c.romanji[0]); // Use first romanji option
-      const correctAnswer = romanjiParts.join('');
+      const romajiParts = threeChars.map(c => c.romaji[0]); // Use first romaji option
+      const correctAnswer = romajiParts.join('');
 
-      // Generate alternative answers by combining all possible romanji variants
+      // Generate alternative answers by combining all possible romaji variants
       const allCombinations = generateRomanjiCombinations(threeChars);
 
       questions.push({
@@ -68,17 +68,17 @@ export function generateQuestions(
 }
 
 /**
- * Generate all possible romanji combinations for a sequence of hiragana characters
+ * Generate all possible romaji combinations for a sequence of hiragana characters
  */
-function generateRomanjiCombinations(chars: Array<{ romanji: string[] }>): string[] {
+function generateRomanjiCombinations(chars: Array<{ romaji: string[] }>): string[] {
   if (chars.length === 0) return [''];
-  if (chars.length === 1) return chars[0].romanji;
+  if (chars.length === 1) return chars[0].romaji;
 
   const [first, ...rest] = chars;
   const restCombinations = generateRomanjiCombinations(rest);
 
   const combinations: string[] = [];
-  for (const firstOption of first.romanji) {
+  for (const firstOption of first.romaji) {
     for (const restOption of restCombinations) {
       combinations.push(firstOption + restOption);
     }
@@ -88,9 +88,9 @@ function generateRomanjiCombinations(chars: Array<{ romanji: string[] }>): strin
 }
 
 /**
- * Validate a user's answer against the correct romanji options
+ * Validate a user's answer against the correct romaji options
  * @param userAnswer The answer provided by the user
- * @param correctAnswers Array of valid romanji answers
+ * @param correctAnswers Array of valid romaji answers
  */
 export function validateAnswer(userAnswer: string, correctAnswers: string[]): boolean {
   const normalized = userAnswer.toLowerCase().trim();

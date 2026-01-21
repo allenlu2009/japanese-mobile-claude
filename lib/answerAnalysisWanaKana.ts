@@ -53,7 +53,7 @@ function alignHiraganaSequences(
       result.push({
         character: correctChar,
         userSyllable: userChars[userIndex],
-        correctSyllables: japaneseChar.romanji,
+        correctSyllables: japaneseChar.romaji,
         isCorrect: true,
         position: i,
       });
@@ -78,7 +78,7 @@ function alignHiraganaSequences(
       result.push({
         character: correctChar,
         userSyllable: consumedChars.join(''), // Hiragana/Katakana joined
-        correctSyllables: japaneseChar.romanji,
+        correctSyllables: japaneseChar.romaji,
         isCorrect: false,
         position: i,
       });
@@ -90,7 +90,7 @@ function alignHiraganaSequences(
         result.push({
           character: correctChar,
           userSyllable: remaining.join(''),
-          correctSyllables: japaneseChar.romanji,
+          correctSyllables: japaneseChar.romaji,
           isCorrect: false,
           position: i,
         });
@@ -99,7 +99,7 @@ function alignHiraganaSequences(
         result.push({
           character: correctChar,
           userSyllable: '',
-          correctSyllables: japaneseChar.romanji,
+          correctSyllables: japaneseChar.romaji,
           isCorrect: false,
           position: i,
         });
@@ -180,7 +180,7 @@ export function analyzeMultiCharAnswerWithWanaKana(
     return {
       character: correctChar,
       userSyllable: userChar, // This is the hiragana/katakana, not romaji!
-      correctSyllables: japaneseChar.romanji,
+      correctSyllables: japaneseChar.romaji,
       isCorrect,
       position: index,
     };

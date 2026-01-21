@@ -28,7 +28,7 @@ describe('Hiragana Test Generator', () => {
         // So the string length can be 3-6 characters depending on how many combos are included
         expect(q.characters.length).toBeGreaterThanOrEqual(3);
         expect(q.characters.length).toBeLessThanOrEqual(6);
-        // correctAnswers contains all romanji combinations (e.g., shi/si variants)
+        // correctAnswers contains all romaji combinations (e.g., shi/si variants)
         expect(q.correctAnswers.length).toBeGreaterThan(0);
       });
     });

@@ -53,8 +53,8 @@ describe('Vocabulary Test Generator', () => {
     });
 
     // Regression tests for doubled consonant bug
-    describe('romanji correctness (regression tests)', () => {
-      it('should NOT have doubled consonants in romanji - 電気 (denki)', () => {
+    describe('romaji correctness (regression tests)', () => {
+      it('should NOT have doubled consonants in romaji - 電気 (denki)', () => {
         const questions = generateVocabularyQuestions(100, 'N5', true);
         const denkiQuestion = questions.find(q => q.word === '電気');
 
@@ -64,7 +64,7 @@ describe('Vocabulary Test Generator', () => {
         }
       });
 
-      it('should NOT have doubled consonants in romanji - 会社 (kaisha)', () => {
+      it('should NOT have doubled consonants in romaji - 会社 (kaisha)', () => {
         const questions = generateVocabularyQuestions(100, 'N5', true);
         const kaishaQuestion = questions.find(q => q.word === '会社');
 
@@ -74,7 +74,7 @@ describe('Vocabulary Test Generator', () => {
         }
       });
 
-      it('should NOT have doubled consonants in romanji - 外国 (gaikoku)', () => {
+      it('should NOT have doubled consonants in romaji - 外国 (gaikoku)', () => {
         const questions = generateVocabularyQuestions(100, 'N5', true);
         const gaikokuQuestion = questions.find(q => q.word === '外国');
 
@@ -84,7 +84,7 @@ describe('Vocabulary Test Generator', () => {
         }
       });
 
-      it('should NOT have doubled consonants in romanji - 学生 (gakusei)', () => {
+      it('should NOT have doubled consonants in romaji - 学生 (gakusei)', () => {
         const questions = generateVocabularyQuestions(100, 'N5', true);
         const gakuseiQuestion = questions.find(q => q.word === '学生');
 
@@ -103,7 +103,7 @@ describe('Vocabulary Test Generator', () => {
         }
       });
 
-      it('should NOT have doubled consonants in romanji - 先生 (sensei)', () => {
+      it('should NOT have doubled consonants in romaji - 先生 (sensei)', () => {
         const questions = generateVocabularyQuestions(100, 'N5', true);
         const senseiQuestion = questions.find(q => q.word === '先生');
 
@@ -130,20 +130,20 @@ describe('Vocabulary Test Generator', () => {
         }
       });
 
-      it('should NOT have doubled consonants anywhere in romanji', () => {
+      it('should NOT have doubled consonants anywhere in romaji', () => {
         const questions = generateVocabularyQuestions(50, 'N5', true);
 
         questions.forEach(q => {
-          q.correctAnswers.forEach(romanji => {
+          q.correctAnswers.forEach(romaji => {
             // Check for any doubled consonants (except 'nn' which represents ん)
             // Match pattern: any consonant (not n) that's doubled
-            const hasInvalidDouble = /([bcdfghjklmpqrstvwxyz])\1/i.test(romanji);
+            const hasInvalidDouble = /([bcdfghjklmpqrstvwxyz])\1/i.test(romaji);
 
             if (hasInvalidDouble) {
               // Allow 'nn' as it represents ん (n sound)
-              const isValidNN = /nn/i.test(romanji);
+              const isValidNN = /nn/i.test(romaji);
               if (!isValidNN) {
-                throw new Error(`Word "${q.word}" (${q.kana}) has invalid doubled consonant in romanji: "${romanji}"`);
+                throw new Error(`Word "${q.word}" (${q.kana}) has invalid doubled consonant in romaji: "${romaji}"`);
               }
             }
           });
@@ -163,7 +163,7 @@ describe('Vocabulary Test Generator', () => {
       expect(result).toBe(true);
     });
 
-    it('should accept any valid romanji variant', () => {
+    it('should accept any valid romaji variant', () => {
       const result1 = validateVocabularyAnswer('sensei', ['sensei', 'sensē', 'sense']);
       expect(result1).toBe(true);
 

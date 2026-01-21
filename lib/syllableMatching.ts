@@ -1,7 +1,7 @@
 import type { HiraganaChar } from './hiragana';
 import type { KatakanaChar } from './katakana';
 
-// All valid romanji syllables (for syllable-aware splitting)
+// All valid romaji syllables (for syllable-aware splitting)
 export const VALID_ROMANJI_SYLLABLES = new Set([
   // Vowels
   'a', 'i', 'u', 'e', 'o',
@@ -58,9 +58,9 @@ export function splitUserAnswer(
       return;
     }
 
-    // FIRST: Try to match the correct romanji for this character
-    const correctMatch = hiraganaChar.romanji.find(romanji =>
-      remaining.startsWith(romanji.toLowerCase())
+    // FIRST: Try to match the correct romaji for this character
+    const correctMatch = hiraganaChar.romaji.find(romaji =>
+      remaining.startsWith(romaji.toLowerCase())
     );
 
     if (correctMatch) {
@@ -76,7 +76,7 @@ export function splitUserAnswer(
 
     let bestMatch: { syllable: string; isValid: boolean } | null = null;
 
-    // Check if we can find any expected romanji for remaining characters
+    // Check if we can find any expected romaji for remaining characters
     const remainingChars = hiraganaChars.slice(index + 1);
     let syncPoint = -1;
 
@@ -84,8 +84,8 @@ export function splitUserAnswer(
       const nextChar = remainingChars[i];
       if (!nextChar) continue;
 
-      for (const romanji of nextChar.romanji) {
-        const pos = remaining.toLowerCase().indexOf(romanji.toLowerCase());
+      for (const romaji of nextChar.romaji) {
+        const pos = remaining.toLowerCase().indexOf(romaji.toLowerCase());
         if (pos >= 0) {
           // Found a sync point
           syncPoint = pos;
@@ -129,7 +129,7 @@ export function splitUserAnswer(
         // (e.g., "bo" appears once, belongs to future char)
         if (!appearsAgainLater) {
           const futureExpects = remainingChars.some(char =>
-            char && char.romanji.some(r => r.toLowerCase() === greedySyllable!.toLowerCase())
+            char && char.romaji.some(r => r.toLowerCase() === greedySyllable!.toLowerCase())
           );
 
           if (futureExpects) {

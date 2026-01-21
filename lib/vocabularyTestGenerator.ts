@@ -2,7 +2,7 @@
  * Vocabulary Test Generator
  *
  * Generates vocabulary reading test questions for JLPT levels (N5, N4, N3).
- * Tests recognition of kanji+kana words and their romanji readings.
+ * Tests recognition of kanji+kana words and their romaji readings.
  *
  * Pattern: Follows the structure of kanjiTestGenerator.ts for consistency
  */
@@ -10,7 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { VocabularyWord } from './vocabulary';
 import { getVocabularyByLevel } from './vocabulary';
-import { isRomanjiMatch } from './romanjiNormalization';
+import { isRomanjiMatch } from './romajiNormalization';
 import type { JLPTLevel } from './kanjiTestGenerator';
 
 /**
@@ -21,7 +21,7 @@ export interface VocabularyQuestion {
   word: string;              // Kanji+kana form (e.g., "日本")
   kana: string;             // Full kana reading (e.g., "にほん")
   meaning: string;          // English meaning (shown as hint)
-  correctAnswers: string[]; // Valid romanji readings
+  correctAnswers: string[]; // Valid romaji readings
   userAnswer?: string;      // User's submitted answer
   isCorrect?: boolean;      // Whether answer was correct
 }
@@ -66,7 +66,7 @@ export function generateVocabularyQuestions(
       word: vocab.word,
       kana: vocab.kana,
       meaning: vocab.meaning,
-      correctAnswers: [...vocab.romanji],
+      correctAnswers: [...vocab.romaji],
     });
   }
 
@@ -75,10 +75,10 @@ export function generateVocabularyQuestions(
 
 /**
  * Validate a user's answer against correct vocabulary readings
- * Uses romanji normalization to accept spelling variants
+ * Uses romaji normalization to accept spelling variants
  *
- * @param userAnswer - The user's romanji input
- * @param correctAnswers - Array of valid romanji readings
+ * @param userAnswer - The user's romaji input
+ * @param correctAnswers - Array of valid romaji readings
  * @returns true if the answer matches any valid reading
  *
  * @example

@@ -21,8 +21,8 @@ import kanjiN1DataRaw from '@/data/processed/kanji-n1.json';
 export interface KanjiChar {
   character: string;           // The kanji character
   meanings: string[];          // English meanings
-  onyomi: string[];           // Chinese-derived readings (romanji)
-  kunyomi: string[];          // Native Japanese readings (romanji)
+  onyomi: string[];           // Chinese-derived readings (romaji)
+  kunyomi: string[];          // Native Japanese readings (romaji)
   jlptLevel: 'N5' | 'N4' | 'N3' | 'N2' | 'N1';    // JLPT difficulty level
 }
 

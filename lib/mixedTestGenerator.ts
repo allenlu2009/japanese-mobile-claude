@@ -38,7 +38,7 @@ export function generateMixedQuestions(
         questions.push({
           id: uuidv4(),
           characters: char.hiragana,
-          correctAnswers: char.romanji,
+          correctAnswers: char.romaji,
         });
       } else {
         const char = getRandomKatakana(difficulty);
@@ -46,7 +46,7 @@ export function generateMixedQuestions(
         questions.push({
           id: uuidv4(),
           characters: char.katakana,
-          correctAnswers: char.romanji,
+          correctAnswers: char.romaji,
         });
       }
     } else {
@@ -65,9 +65,9 @@ export function generateMixedQuestions(
         const sequence = char1.hiragana + char2.hiragana + char3.hiragana;
 
         const combinations = generateRomanjiCombinations([
-          char1.romanji,
-          char2.romanji,
-          char3.romanji
+          char1.romaji,
+          char2.romaji,
+          char3.romaji
         ]);
 
         questions.push({
@@ -82,9 +82,9 @@ export function generateMixedQuestions(
         const sequence = char1.katakana + char2.katakana + char3.katakana;
 
         const combinations = generateRomanjiCombinations([
-          char1.romanji,
-          char2.romanji,
-          char3.romanji
+          char1.romaji,
+          char2.romaji,
+          char3.romaji
         ]);
 
         questions.push({
@@ -99,11 +99,11 @@ export function generateMixedQuestions(
   return questions;
 }
 
-function generateRomanjiCombinations(romanjiArrays: string[][]): string[] {
-  if (romanjiArrays.length === 0) return [''];
-  if (romanjiArrays.length === 1) return romanjiArrays[0];
+function generateRomanjiCombinations(romajiArrays: string[][]): string[] {
+  if (romajiArrays.length === 0) return [''];
+  if (romajiArrays.length === 1) return romajiArrays[0];
 
-  const [first, ...rest] = romanjiArrays;
+  const [first, ...rest] = romajiArrays;
   const restCombinations = generateRomanjiCombinations(rest);
 
   const result: string[] = [];

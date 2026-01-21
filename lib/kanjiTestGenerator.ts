@@ -10,7 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { KanjiChar } from './kanji';
 import { getKanjiByLevel } from './kanji';
-import { isRomanjiMatch } from './romanjiNormalization';
+import { isRomanjiMatch } from './romajiNormalization';
 
 /**
  * Kanji reading modes for test configuration
@@ -101,9 +101,9 @@ export function generateKanjiQuestions(
 
 /**
  * Validate a user's answer against correct kanji readings
- * Uses romanji normalization to accept spelling variants
+ * Uses romaji normalization to accept spelling variants
  *
- * @param userAnswer - The user's romanji input
+ * @param userAnswer - The user's romaji input
  * @param correctAnswers - Array of valid readings
  * @returns true if the answer matches any valid reading
  *
