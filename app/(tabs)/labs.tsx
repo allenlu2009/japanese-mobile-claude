@@ -3,6 +3,7 @@ import { View, Text, SafeAreaView, ScrollView, Switch, TouchableOpacity, Activit
 import { getSettings, saveSettings, type AppSettings } from '../../lib/storage/settingsStorage';
 import { importFromFile, exportToFile, getImportHistory, type ImportHistoryEntry } from '../../lib/storage/importExport';
 import { getTestCount, getCharacterAttemptCount } from '../../lib/storage/testStorage';
+import Constants from 'expo-constants';
 
 export default function LabsScreen() {
   const [settings, setSettings] = useState<AppSettings>({
@@ -390,8 +391,39 @@ export default function LabsScreen() {
                 and detailed analytics.
               </Text>
               <Text className="text-xs text-slate-400 mt-3">
-                Version 1.0.0
+                Version {Constants.expoConfig?.version || '1.0.0'}
               </Text>
+            </View>
+          </View>
+
+          {/* System Registry */}
+          <View className="gap-3">
+            <Text className="text-lg font-semibold text-slate-900">
+              System Registry
+            </Text>
+
+            <View className="rounded-2xl border border-slate-200 bg-white p-4">
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-xs text-slate-600">Runtime Version</Text>
+                <Text className="text-xs font-mono text-slate-900">
+                  {Constants.expoConfig?.runtimeVersion || '1.0.0'}
+                </Text>
+              </View>
+
+              {Constants.expoConfig?.updates?.updateId ? (
+                <View className="flex-row justify-between items-center">
+                  <Text className="text-xs text-slate-600">Update ID</Text>
+                  <Text className="text-xs font-mono text-green-600">
+                    {Constants.expoConfig.updates.updateId.slice(0, 8)}...
+                  </Text>
+                </View>
+              ) : (
+                <View className="bg-slate-50 rounded-lg p-3">
+                  <Text className="text-xs text-slate-500 text-center">
+                    Running from build (no OTA update loaded)
+                  </Text>
+                </View>
+              )}
             </View>
           </View>
         </View>

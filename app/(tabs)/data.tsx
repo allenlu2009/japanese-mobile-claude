@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { SafeAreaView, Text, View, TouchableOpacity, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import { importFromFile, exportToFile, getImportHistory, type ImportHistoryEntry } from '../../lib/storage/importExport';
 import { getTestCount, getCharacterAttemptCount } from '../../lib/storage/testStorage';
+import Constants from 'expo-constants';
 
 export default function DataScreen() {
   const [importing, setImporting] = useState(false);
@@ -238,6 +239,40 @@ export default function DataScreen() {
               })}
             </View>
           )}
+        </View>
+
+        {/* System Registry Footer */}
+        <View className="mt-8 pt-6 border-t border-slate-200">
+          <Text className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+            System Registry
+          </Text>
+          <View className="rounded-xl bg-slate-50 p-3">
+            <View className="flex-row justify-between items-center mb-1">
+              <Text className="text-xs text-slate-600">App Version</Text>
+              <Text className="text-xs font-mono text-slate-900">
+                {Constants.expoConfig?.version || '1.0.0'}
+              </Text>
+            </View>
+            <View className="flex-row justify-between items-center mb-1">
+              <Text className="text-xs text-slate-600">Runtime Version</Text>
+              <Text className="text-xs font-mono text-slate-900">
+                {Constants.expoConfig?.runtimeVersion || '1.0.0'}
+              </Text>
+            </View>
+            {Constants.expoConfig?.updates?.updateId && (
+              <View className="flex-row justify-between items-center">
+                <Text className="text-xs text-slate-600">Update ID</Text>
+                <Text className="text-xs font-mono text-slate-900">
+                  {Constants.expoConfig.updates.updateId.slice(0, 8)}...
+                </Text>
+              </View>
+            )}
+            {!Constants.expoConfig?.updates?.updateId && (
+              <Text className="text-xs text-slate-400 mt-1">
+                No OTA update loaded (running from build)
+              </Text>
+            )}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
