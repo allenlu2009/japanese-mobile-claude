@@ -6,7 +6,7 @@ export interface AppSettings {
   showHints: boolean;
   autoAdvance: boolean;
   theme: 'light' | 'dark';
-  jlptLevel: 'N5' | 'N4' | 'N3';
+  jlptLevel: 'N5' | 'N4' | 'N3' | 'N2' | 'N1';
   includeLowerLevels: boolean;
 }
 
@@ -46,7 +46,7 @@ export async function getSettings(): Promise<AppSettings> {
     showHints: (await getSetting('show_hints', 'true')) === 'true',
     autoAdvance: (await getSetting('auto_advance', 'false')) === 'true',
     theme: (await getSetting('theme', 'light')) as 'light' | 'dark',
-    jlptLevel: (await getSetting('jlpt_level', 'N4')) as 'N5' | 'N4' | 'N3',
+    jlptLevel: (await getSetting('jlpt_level', 'N4')) as 'N5' | 'N4' | 'N3' | 'N2' | 'N1',
     includeLowerLevels: (await getSetting('include_lower_levels', 'true')) === 'true'
   };
 }

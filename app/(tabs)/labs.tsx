@@ -11,7 +11,7 @@ export default function LabsScreen() {
     showHints: true,
     autoAdvance: false,
     theme: 'light',
-    jlptLevel: 'N4',
+    jlptLevel: 'N3',
     includeLowerLevels: true
   });
   const [importing, setImporting] = useState(false);
@@ -129,7 +129,7 @@ export default function LabsScreen() {
                 <Text className="text-sm font-medium text-slate-700 mb-3">
                   JLPT Level
                 </Text>
-                <View className="flex-row gap-2">
+                <View className="flex-row gap-2 mb-2">
                   {(['N5', 'N4', 'N3'] as const).map((level) => (
                     <TouchableOpacity
                       key={level}
@@ -152,8 +152,31 @@ export default function LabsScreen() {
                     </TouchableOpacity>
                   ))}
                 </View>
+                <View className="flex-row gap-2">
+                  {(['N2', 'N1'] as const).map((level) => (
+                    <TouchableOpacity
+                      key={level}
+                      className={`flex-1 rounded-xl p-3 border-2 ${
+                        settings.jlptLevel === level
+                          ? 'border-blue-500 bg-blue-50'
+                          : 'border-slate-200 bg-white'
+                      }`}
+                      onPress={() => updateSetting('jlptLevel', level)}
+                    >
+                      <Text
+                        className={`text-center font-semibold ${
+                          settings.jlptLevel === level
+                            ? 'text-blue-600'
+                            : 'text-slate-600'
+                        }`}
+                      >
+                        {level}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
                 <Text className="text-xs text-slate-500 mt-2">
-                  Select your target JLPT difficulty level
+                  Select your target JLPT difficulty level (N5: easiest → N1: hardest)
                 </Text>
               </View>
 
