@@ -40,7 +40,8 @@
       "router": {},
       "eas": {
         "projectId": "f2763809-e095-48e3-aa1b-c2eb520cbd58"
-      }
+      },
+      "gitCommit": "189feef"
     },
     "runtimeVersion": {
       "policy": "appVersion"

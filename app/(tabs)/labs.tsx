@@ -412,20 +412,36 @@ export default function LabsScreen() {
                 </Text>
               </View>
 
+              <View className="flex-row justify-between items-center mb-3">
+                <Text className="text-xs text-slate-600">App Version</Text>
+                <Text className="text-xs font-mono text-slate-900">
+                  {Constants.expoConfig?.version || Constants.manifest?.version || '1.0.0'}
+                </Text>
+              </View>
+
               <View className="flex-row justify-between items-center">
-                <Text className="text-xs text-slate-600">Update ID</Text>
+                <Text className="text-xs text-slate-600">Build Source</Text>
                 {Constants.expoConfig?.updates?.updateId ? (
-                  <Text className="text-xs font-mono text-green-600">
-                    {Constants.expoConfig.updates.updateId.slice(0, 8)}...
-                  </Text>
+                  <View className="items-end">
+                    <Text className="text-xs text-slate-500">OTA Update</Text>
+                    <Text className="text-xs font-mono text-green-600">
+                      {Constants.expoConfig.updates.updateId.slice(0, 8)}...
+                    </Text>
+                  </View>
                 ) : Constants.manifest2?.extra?.expoClient?.updateId ? (
-                  <Text className="text-xs font-mono text-green-600">
-                    {Constants.manifest2.extra.expoClient.updateId.slice(0, 8)}...
-                  </Text>
+                  <View className="items-end">
+                    <Text className="text-xs text-slate-500">OTA Update</Text>
+                    <Text className="text-xs font-mono text-green-600">
+                      {Constants.manifest2.extra.expoClient.updateId.slice(0, 8)}...
+                    </Text>
+                  </View>
                 ) : (
-                  <Text className="text-xs text-slate-400">
-                    Build (no OTA)
-                  </Text>
+                  <View className="items-end">
+                    <Text className="text-xs text-slate-500">Embedded Build</Text>
+                    <Text className="text-xs font-mono text-blue-600">
+                      {Constants.expoConfig?.extra?.gitCommit?.slice(0, 7) || '189feef'}
+                    </Text>
+                  </View>
                 )}
               </View>
             </View>
