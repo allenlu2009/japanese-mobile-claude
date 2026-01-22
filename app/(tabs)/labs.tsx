@@ -406,7 +406,9 @@ export default function LabsScreen() {
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-xs text-slate-600">Runtime Version</Text>
                 <Text className="text-xs font-mono text-slate-900">
-                  {Constants.expoConfig?.runtimeVersion?.toString() || Constants.manifest?.runtimeVersion || '1.0.0'}
+                  {typeof Constants.expoConfig?.runtimeVersion === 'string'
+                    ? Constants.expoConfig.runtimeVersion
+                    : Constants.manifest?.runtimeVersion || '1.0.0'}
                 </Text>
               </View>
 

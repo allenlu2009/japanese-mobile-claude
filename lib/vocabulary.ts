@@ -27,9 +27,9 @@ export interface VocabularyWord {
 }
 
 // Load vocabulary data from JSON files
-export const VOCABULARY_N5: VocabularyWord[] = vocabularyN5Data as VocabularyWord[];
-export const VOCABULARY_N4: VocabularyWord[] = vocabularyN4Data as VocabularyWord[];
-// Extract words array from N3/N2/N1 meta wrappers
+// Extract words array from all meta wrappers (N5/N4/N3/N2/N1 all have meta structure)
+export const VOCABULARY_N5: VocabularyWord[] = ((vocabularyN5Data as any).words || vocabularyN5Data) as VocabularyWord[];
+export const VOCABULARY_N4: VocabularyWord[] = ((vocabularyN4Data as any).words || vocabularyN4Data) as VocabularyWord[];
 const vocabularyN3Data = (vocabularyN3DataRaw as any).words;
 export const VOCABULARY_N3: VocabularyWord[] = vocabularyN3Data as VocabularyWord[];
 const vocabularyN2Data = (vocabularyN2DataRaw as any).words;
