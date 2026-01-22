@@ -391,7 +391,7 @@ export default function LabsScreen() {
                 and detailed analytics.
               </Text>
               <Text className="text-xs text-slate-400 mt-3">
-                Version {Constants.expoConfig?.version || '1.0.0'}
+                Version 1.0.0
               </Text>
             </View>
           </View>
@@ -406,24 +406,26 @@ export default function LabsScreen() {
               <View className="flex-row justify-between items-center mb-3">
                 <Text className="text-xs text-slate-600">Runtime Version</Text>
                 <Text className="text-xs font-mono text-slate-900">
-                  {Constants.expoConfig?.runtimeVersion || '1.0.0'}
+                  {Constants.expoConfig?.runtimeVersion?.toString() || Constants.manifest?.runtimeVersion || '1.0.0'}
                 </Text>
               </View>
 
-              {Constants.expoConfig?.updates?.updateId ? (
-                <View className="flex-row justify-between items-center">
-                  <Text className="text-xs text-slate-600">Update ID</Text>
+              <View className="flex-row justify-between items-center">
+                <Text className="text-xs text-slate-600">Update ID</Text>
+                {Constants.expoConfig?.updates?.updateId ? (
                   <Text className="text-xs font-mono text-green-600">
                     {Constants.expoConfig.updates.updateId.slice(0, 8)}...
                   </Text>
-                </View>
-              ) : (
-                <View className="bg-slate-50 rounded-lg p-3">
-                  <Text className="text-xs text-slate-500 text-center">
-                    Running from build (no OTA update loaded)
+                ) : Constants.manifest2?.extra?.expoClient?.updateId ? (
+                  <Text className="text-xs font-mono text-green-600">
+                    {Constants.manifest2.extra.expoClient.updateId.slice(0, 8)}...
                   </Text>
-                </View>
-              )}
+                ) : (
+                  <Text className="text-xs text-slate-400">
+                    Build (no OTA)
+                  </Text>
+                )}
+              </View>
             </View>
           </View>
         </View>
